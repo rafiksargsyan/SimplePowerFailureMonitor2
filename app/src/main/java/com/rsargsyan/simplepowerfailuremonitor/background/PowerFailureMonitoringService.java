@@ -1,4 +1,4 @@
-package com.rsargsyan.simplepowerfailuremonitor;
+package com.rsargsyan.simplepowerfailuremonitor.background;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -7,34 +7,64 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.BatteryManager;
 import android.os.IBinder;
 import android.provider.Settings;
 
-import androidx.annotation.AttrRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
+
+import com.rsargsyan.simplepowerfailuremonitor.R;
+import com.rsargsyan.simplepowerfailuremonitor.ui.MainActivity;
+import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
+import com.rsargsyan.simplepowerfailuremonitor.utils.DrawableUtil;
 
 import java.io.IOException;
 
-public class PowerFailureMonitoringService extends Service {
+public class PowerFailureMonitoringService extends Service implements SensorEventListener {
     private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
+    private static final String SMART_CANCEL_KEY = "smart_cancel";
 
     private BroadcastReceiver receiver;
     private MediaPlayer mp;
     private boolean phoneIsPlugged = false;
+    private boolean alarmIsOn = false;
+    private boolean smartCancel;
+
+    private SensorManager sensorManager;
+    private float accel;
+    private float accelCurrent;
+    private float accelLast;
 
     @Override
     public void onCreate() {
         registerChargingStateReceiver();
+
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        smartCancel = sharedPreferences.getBoolean(SMART_CANCEL_KEY, false);
+
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer,
+                SensorManager.SENSOR_DELAY_NORMAL);
+        accel = 0.00f;
+        accelCurrent = SensorManager.GRAVITY_EARTH;
+        accelLast = SensorManager.GRAVITY_EARTH;
     }
 
     @Override
@@ -53,6 +83,7 @@ public class PowerFailureMonitoringService extends Service {
     public void onDestroy() {
         unregisterReceiver(receiver);
         destroyMediaPlayer();
+        sensorManager.unregisterListener(this);
     }
 
     private void initMediaPlayer() {
@@ -138,12 +169,36 @@ public class PowerFailureMonitoringService extends Service {
             destroyMediaPlayer();
             initMediaPlayer();
             mp.start();
+            alarmIsOn = true;
         } else {
             if (mp != null) {
                 mp.stop();
             }
+            alarmIsOn = false;
         }
     }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            float[] gravity = event.values.clone();
+            // Shake detection
+            float x = gravity[0];
+            float y = gravity[1];
+            float z = gravity[2];
+            accelLast = accelCurrent;
+            accelCurrent = (float) Math.sqrt(x*x + y*y + z*z);
+            float delta = accelCurrent - accelLast;
+            accel = accel * 0.9f + delta;
+            if(smartCancel && alarmIsOn && accel > 0.5){
+                stopForeground(true);
+                stopSelf();
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
     private class ChargingStateReceiver extends BroadcastReceiver {
         @Override

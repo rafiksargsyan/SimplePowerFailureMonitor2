@@ -1,4 +1,4 @@
-package com.rsargsyan.simplepowerfailuremonitor;
+package com.rsargsyan.simplepowerfailuremonitor.utils;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
