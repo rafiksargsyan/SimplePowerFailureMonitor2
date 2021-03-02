@@ -13,6 +13,8 @@ import android.content.SharedPreferences;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.Toast;
 
 import com.rsargsyan.simplepowerfailuremonitor.databinding.ActivityMainBinding;
@@ -107,6 +109,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(receiver);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_options_menu, menu);
+        return true;
     }
 
     private class ChargingStateReceiver extends BroadcastReceiver {

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Simple Power Failure Monitor</string>
     <string name="start_stop_monitoring">Start/stop monitoring</string>
+    <string name="settings">Settings</string>
 </resources>
