@@ -98,6 +98,9 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
         unregisterReceiver(receiver);
         destroyMediaPlayer();
         sensorManager.unregisterListener(this);
+        if (smsSender != null) {
+            smsSender.destroy();
+        }
     }
 
     private void initMediaPlayer() {
