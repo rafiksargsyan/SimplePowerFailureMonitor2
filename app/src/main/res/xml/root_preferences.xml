@@ -5,4 +5,15 @@
         app:title="Smart cancellation"
         app:summary="Automatically cancel alarms when human interaction is detected" />
 
+    <SwitchPreferenceCompat
+        app:key="send_sms"
+        app:title="Send SMS"
+        app:summary="Send SMS when power failure is detected" />
+
+    <EditTextPreference
+        app:key="phone_number"
+        app:title="SMS recipient phone number"
+        app:defaultValue="077393100"
+        app:useSimpleSummaryProvider="true"
+        app:dependency="send_sms" />
 </PreferenceScreen>

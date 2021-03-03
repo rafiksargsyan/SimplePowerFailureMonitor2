@@ -27,7 +27,9 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
+import com.rsargsyan.simplepowerfailuremonitor.PowerFailureObserver;
 import com.rsargsyan.simplepowerfailuremonitor.R;
+import com.rsargsyan.simplepowerfailuremonitor.SMSSender;
 import com.rsargsyan.simplepowerfailuremonitor.ui.MainActivity;
 import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
 import com.rsargsyan.simplepowerfailuremonitor.utils.DrawableUtil;
@@ -38,6 +40,8 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
     private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
     private static final String SMART_CANCEL_KEY = "smart_cancel";
+    private static final String SEND_SMS_KEY = "send_sms";
+    private static final String PHONE_NUMBER_KEY = "phone_number";
 
     private BroadcastReceiver receiver;
     private MediaPlayer mp;
@@ -49,6 +53,10 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
     private float accel;
     private float accelCurrent;
     private float accelLast;
+
+    private PowerFailureObserver smsSender;
+    private boolean sendSMS;
+    private String phoneNumber;
 
     @Override
     public void onCreate() {
@@ -65,6 +73,12 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
         accel = 0.00f;
         accelCurrent = SensorManager.GRAVITY_EARTH;
         accelLast = SensorManager.GRAVITY_EARTH;
+
+        sendSMS = sharedPreferences.getBoolean(SEND_SMS_KEY, false);
+        phoneNumber = sharedPreferences.getString(PHONE_NUMBER_KEY, null);
+        if (sendSMS && phoneNumber != null) {
+            smsSender = new SMSSender(phoneNumber);
+        }
     }
 
     @Override
@@ -175,6 +189,10 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
                 mp.stop();
             }
             alarmIsOn = false;
+        }
+
+        if (smsSender != null) {
+            smsSender.observe(phoneIsPlugged);
         }
     }
 
