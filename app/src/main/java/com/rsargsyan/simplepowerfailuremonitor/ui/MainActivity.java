@@ -5,13 +5,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,21 +21,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.rsargsyan.simplepowerfailuremonitor.MainAndroidViewModelFactory;
+import com.rsargsyan.simplepowerfailuremonitor.MainViewModel;
 import com.rsargsyan.simplepowerfailuremonitor.background.PowerFailureMonitoringService;
 import com.rsargsyan.simplepowerfailuremonitor.R;
 import com.rsargsyan.simplepowerfailuremonitor.databinding.ActivityMainBinding;
+import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String MONITORING_PREFERENCES = "monitoring_preferences";
-    private static final String MONITORING_STARTED_KEY = "MONITORING_STARTED";
-    private static final boolean MONITORING_STARTED_DEFAULT = false;
 
     private ActivityMainBinding binding;
-    private boolean monitoringIsStarted;
-    private SharedPreferences sharedPreferences;
-    @SuppressWarnings("FieldCanBeLocal")
-    private SharedPreferences.OnSharedPreferenceChangeListener prefChangeListener;
     private BroadcastReceiver receiver;
+    private MainViewModel mainViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,18 +44,29 @@ public class MainActivity extends AppCompatActivity {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+        mainViewModel =
+                new ViewModelProvider(this, new MainAndroidViewModelFactory(getApplication()))
+                        .get(MainViewModel.class);
+
+        mainViewModel.getMonitoringIsStarted().observe(this, (Observer<Boolean>) o -> {
+            if (o == null) o = Constants.MONITORING_STARTED_DEFAULT;
+            @DrawableRes int drawable =
+                    (o ? R.drawable.ic_baseline_pause_24 : R.drawable.ic_baseline_play_arrow_24);
+            binding.startStopMonitorFab.setImageResource(drawable);
+            if (o) {
+                startMonitoringService();
+                Toast.makeText(this,
+                        "Monitoring has been started!", Toast.LENGTH_SHORT).show();
+            } else {
+                stopService(new Intent(this, PowerFailureMonitoringService.class));
+                Toast.makeText(this,
+                        "Monitoring has been stopped!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         registerStartStopMonitorOnClickListener();
 
-        initSharedPreferences();
-
-        updateMonitoringState();
-
         registerChargingStateReceiver();
-
-        // In case monitoring service has died for some reason
-        if (monitoringIsStarted) {
-            startMonitoringService();
-        }
     }
 
     private void registerChargingStateReceiver() {
@@ -66,41 +75,13 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(receiver, filter);
     }
 
-    private void updateMonitoringState() {
-        monitoringIsStarted =
-                sharedPreferences.getBoolean(MONITORING_STARTED_KEY, MONITORING_STARTED_DEFAULT);
-        @DrawableRes int drawable =
-                (monitoringIsStarted ? R.drawable.ic_baseline_pause_24
-                        : R.drawable.ic_baseline_play_arrow_24);
-        binding.startStopMonitorFab.setImageResource(drawable);
-    }
-
-    private void initSharedPreferences() {
-        sharedPreferences =
-                getApplicationContext().getSharedPreferences(MONITORING_PREFERENCES,
-                        Context.MODE_PRIVATE);
-        // Need to have strong reference to the listener
-        prefChangeListener = (sharedPreferences, key) -> {
-            if (key != null) {
-                updateMonitoringState();
-            }
-        };
-        sharedPreferences.registerOnSharedPreferenceChangeListener(prefChangeListener);
-    }
-
     private void registerStartStopMonitorOnClickListener() {
         binding.startStopMonitorFab.setOnClickListener(v -> {
-            if (monitoringIsStarted) {
-                stopService(new Intent(this, PowerFailureMonitoringService.class));
-                Toast.makeText(this,
-                        "Monitoring has been stopped!", Toast.LENGTH_SHORT).show();
-            } else {
-                startMonitoringService();
-                Toast.makeText(this,
-                        "Monitoring has been started!", Toast.LENGTH_SHORT).show();
+            Boolean monitoringIsStarted = mainViewModel.getMonitoringIsStarted().getValue();
+            if (monitoringIsStarted == null) {
+                monitoringIsStarted = Constants.MONITORING_STARTED_DEFAULT;
             }
-            sharedPreferences.edit()
-                    .putBoolean(MONITORING_STARTED_KEY, !monitoringIsStarted).apply();
+            mainViewModel.setMonitoringIsStarted(!monitoringIsStarted);
         });
     }
 
