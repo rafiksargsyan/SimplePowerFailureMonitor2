@@ -10,10 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.BatteryManager;
@@ -27,6 +23,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
+import com.rsargsyan.simplepowerfailuremonitor.HumanInteractionDetector;
 import com.rsargsyan.simplepowerfailuremonitor.PowerFailureObserver;
 import com.rsargsyan.simplepowerfailuremonitor.R;
 import com.rsargsyan.simplepowerfailuremonitor.SMSSender;
@@ -36,7 +33,7 @@ import com.rsargsyan.simplepowerfailuremonitor.utils.DrawableUtil;
 
 import java.io.IOException;
 
-public class PowerFailureMonitoringService extends Service implements SensorEventListener {
+public class PowerFailureMonitoringService extends Service{
     private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
     private static final String SMART_CANCEL_KEY = "smart_cancel";
@@ -49,14 +46,11 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
     private boolean alarmIsOn = false;
     private boolean smartCancel;
 
-    private SensorManager sensorManager;
-    private float accel;
-    private float accelCurrent;
-    private float accelLast;
-
     private PowerFailureObserver smsSender;
     private boolean sendSMS;
     private String phoneNumber;
+
+    private HumanInteractionDetector humanInteractionDetector;
 
     @Override
     public void onCreate() {
@@ -66,19 +60,18 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
                 PreferenceManager.getDefaultSharedPreferences(this);
         smartCancel = sharedPreferences.getBoolean(SMART_CANCEL_KEY, false);
 
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, accelerometer,
-                SensorManager.SENSOR_DELAY_NORMAL);
-        accel = 0.00f;
-        accelCurrent = SensorManager.GRAVITY_EARTH;
-        accelLast = SensorManager.GRAVITY_EARTH;
-
         sendSMS = sharedPreferences.getBoolean(SEND_SMS_KEY, false);
         phoneNumber = sharedPreferences.getString(PHONE_NUMBER_KEY, null);
         if (sendSMS && phoneNumber != null) {
             smsSender = new SMSSender(phoneNumber);
         }
+
+        humanInteractionDetector = new HumanInteractionDetector(this, () -> {
+            if(smartCancel && alarmIsOn) {
+                stopForeground(true);
+                stopSelf();
+            }
+        });
     }
 
     @Override
@@ -97,10 +90,10 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
     public void onDestroy() {
         unregisterReceiver(receiver);
         destroyMediaPlayer();
-        sensorManager.unregisterListener(this);
         if (smsSender != null) {
             smsSender.destroy();
         }
+        humanInteractionDetector.unregister();
     }
 
     private void initMediaPlayer() {
@@ -198,28 +191,6 @@ public class PowerFailureMonitoringService extends Service implements SensorEven
             smsSender.observe(phoneIsPlugged);
         }
     }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            float[] gravity = event.values.clone();
-            // Shake detection
-            float x = gravity[0];
-            float y = gravity[1];
-            float z = gravity[2];
-            accelLast = accelCurrent;
-            accelCurrent = (float) Math.sqrt(x*x + y*y + z*z);
-            float delta = accelCurrent - accelLast;
-            accel = accel * 0.9f + delta;
-            if(smartCancel && alarmIsOn && accel > 0.5){
-                stopForeground(true);
-                stopSelf();
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
     private class ChargingStateReceiver extends BroadcastReceiver {
         @Override
