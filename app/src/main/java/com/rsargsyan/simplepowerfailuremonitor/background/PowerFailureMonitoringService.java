@@ -25,15 +25,16 @@ import androidx.lifecycle.LiveData;
 import androidx.preference.PreferenceManager;
 
 import com.rsargsyan.simplepowerfailuremonitor.HumanInteractionDetector;
-import com.rsargsyan.simplepowerfailuremonitor.PowerFailureObserver;
 import com.rsargsyan.simplepowerfailuremonitor.R;
-import com.rsargsyan.simplepowerfailuremonitor.SMSSender;
 import com.rsargsyan.simplepowerfailuremonitor.SharedPreferenceLiveData;
 import com.rsargsyan.simplepowerfailuremonitor.ui.MainActivity;
 import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
 import com.rsargsyan.simplepowerfailuremonitor.utils.DrawableUtil;
+import com.rsargsyan.simplepowerfailuremonitor.utils.SMSUtil;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PowerFailureMonitoringService extends LifecycleService {
     private static final int NOTIFICATION_ID = 1; // magic number
@@ -42,18 +43,17 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private static final String SEND_SMS_KEY = "send_sms";
     private static final String PHONE_NUMBER_KEY = "phone_number";
 
+    private final ExecutorService smsSenderExecutor = Executors.newSingleThreadExecutor();
+
     private SharedPreferences sharedPreferences;
 
     private LiveData<Boolean> smartCancelLive;
+    private LiveData<Boolean> sendSMSLive;
+    private LiveData<String> phoneNumberLive;
 
     private BroadcastReceiver receiver;
     private MediaPlayer mp;
-    private boolean phoneIsPlugged = false;
-
-    private PowerFailureObserver smsSender;
-    private boolean sendSMS;
-    private String phoneNumber;
-
+    private Boolean phoneIsPlugged;
     private HumanInteractionDetector humanInteractionDetector;
 
     @Override
@@ -65,6 +65,12 @@ public class PowerFailureMonitoringService extends LifecycleService {
 
         smartCancelLive =
                 new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SMART_CANCEL_KEY);
+
+        sendSMSLive =
+                new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SEND_SMS_KEY);
+
+        phoneNumberLive =
+                new SharedPreferenceLiveData<>(String.class, sharedPreferences, PHONE_NUMBER_KEY);
 
         humanInteractionDetector =
                 new HumanInteractionDetector(this, () -> {
@@ -83,15 +89,12 @@ public class PowerFailureMonitoringService extends LifecycleService {
             }
         });
 
-        sendSMS = sharedPreferences.getBoolean(SEND_SMS_KEY, false);
-        phoneNumber = sharedPreferences.getString(PHONE_NUMBER_KEY, null);
-        if (sendSMS && phoneNumber != null) {
-            smsSender = new SMSSender(phoneNumber);
-        }
+        sendSMSLive.observe(this, sendSMS -> { /*NOOP*/ });
+        phoneNumberLive.observe(this, phoneNumber -> { /*NOOP*/ });
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         bringToForeground();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -108,10 +111,8 @@ public class PowerFailureMonitoringService extends LifecycleService {
         super.onDestroy();
         unregisterReceiver(receiver);
         destroyMediaPlayer();
-        if (smsSender != null) {
-            smsSender.destroy();
-        }
         humanInteractionDetector.unregister();
+        smsSenderExecutor.shutdown();
     }
 
     private void initMediaPlayer() {
@@ -147,14 +148,20 @@ public class PowerFailureMonitoringService extends LifecycleService {
         registerReceiver(receiver, filter);
     }
 
-    private Notification createNotification(boolean phoneIsPlugged) {
-        @DrawableRes final int largeIconInt =
-                (phoneIsPlugged ? R.drawable.ic_battery_charging_sharp_green_24dp
-                        : R.drawable.ic_battery_alert_sharp_red_24dp);
-        final Drawable drawable = ContextCompat.getDrawable(this, largeIconInt);
-        final Bitmap bitmap = DrawableUtil.drawableToBitmap(drawable);
-        final String contentTitle =
-                (phoneIsPlugged ? "The phone is plugged" : "The phone is not plugged");
+    private Notification createNotification(Boolean phoneIsPlugged) {
+        @DrawableRes int largeIconInt;
+        Drawable drawable;
+        Bitmap bitmap =  null;
+        String contentTitle = null;
+        if (phoneIsPlugged != null) {
+            largeIconInt =
+                    (phoneIsPlugged ? R.drawable.ic_battery_charging_sharp_green_24dp
+                            : R.drawable.ic_battery_alert_sharp_red_24dp);
+            drawable = ContextCompat.getDrawable(this, largeIconInt);
+            bitmap = DrawableUtil.drawableToBitmap(drawable);
+            contentTitle =
+                    (phoneIsPlugged ? "The phone is plugged" : "The phone is not plugged");
+        }
         return createNotification(contentTitle, bitmap, createMainActivityIntent());
     }
 
@@ -183,36 +190,49 @@ public class PowerFailureMonitoringService extends LifecycleService {
                 .build();
     }
 
-    private void handle(int pluggedValue) {
-        boolean previousState = phoneIsPlugged;
-        phoneIsPlugged = pluggedValue != 0;
-        if (previousState == phoneIsPlugged) {
+    private void handle(boolean isPlugged) {
+        if (phoneIsPlugged != null && phoneIsPlugged == isPlugged) {
             return;
         }
 
-        Notification notification = createNotification(phoneIsPlugged);
+        Notification notification = createNotification(isPlugged);
         NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification);
 
-        if (!phoneIsPlugged) {
-            destroyMediaPlayer();
-            initMediaPlayer();
-            mp.start();
-        } else {
+        if (isPlugged) {
             if (mp != null) {
                 mp.stop();
             }
+        } else {
+            destroyMediaPlayer();
+            initMediaPlayer();
+            mp.start();
         }
 
-        if (smsSender != null) {
-            smsSender.observe(phoneIsPlugged);
+        if (shouldSendSMS(isPlugged)) {
+            smsSenderExecutor.submit(() -> {
+                final String phoneNumber = phoneNumberLive.getValue();
+                if (phoneNumber != null) {
+                    final String msg = (isPlugged ? "Power is on" : "Power is off");
+                    SMSUtil.sendSMS(phoneNumber, msg);
+                }
+            });
         }
+
+        phoneIsPlugged = isPlugged;
+    }
+
+    private boolean shouldSendSMS(boolean isPlugged) {
+        final Boolean sendSMS = sendSMSLive.getValue();
+        return sendSMS != null && sendSMS
+                && (phoneIsPlugged == null || phoneIsPlugged != isPlugged);
     }
 
     private class ChargingStateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int pluggedValue = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-            handle(pluggedValue);
+            final int pluggedValue =
+                    intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+            handle(pluggedValue != 0);
         }
     }
 }
