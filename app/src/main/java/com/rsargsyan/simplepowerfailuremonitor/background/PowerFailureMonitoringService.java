@@ -2,7 +2,6 @@ package com.rsargsyan.simplepowerfailuremonitor.background;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,30 +20,35 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleService;
+import androidx.lifecycle.LiveData;
 import androidx.preference.PreferenceManager;
 
 import com.rsargsyan.simplepowerfailuremonitor.HumanInteractionDetector;
 import com.rsargsyan.simplepowerfailuremonitor.PowerFailureObserver;
 import com.rsargsyan.simplepowerfailuremonitor.R;
 import com.rsargsyan.simplepowerfailuremonitor.SMSSender;
+import com.rsargsyan.simplepowerfailuremonitor.SharedPreferenceLiveData;
 import com.rsargsyan.simplepowerfailuremonitor.ui.MainActivity;
 import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
 import com.rsargsyan.simplepowerfailuremonitor.utils.DrawableUtil;
 
 import java.io.IOException;
 
-public class PowerFailureMonitoringService extends Service{
+public class PowerFailureMonitoringService extends LifecycleService {
     private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
     private static final String SMART_CANCEL_KEY = "smart_cancel";
     private static final String SEND_SMS_KEY = "send_sms";
     private static final String PHONE_NUMBER_KEY = "phone_number";
 
+    private SharedPreferences sharedPreferences;
+
+    private LiveData<Boolean> smartCancelLive;
+
     private BroadcastReceiver receiver;
     private MediaPlayer mp;
     private boolean phoneIsPlugged = false;
-    private boolean alarmIsOn = false;
-    private boolean smartCancel;
 
     private PowerFailureObserver smsSender;
     private boolean sendSMS;
@@ -54,24 +58,36 @@ public class PowerFailureMonitoringService extends Service{
 
     @Override
     public void onCreate() {
+        super.onCreate();
+
+        sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+
+        smartCancelLive =
+                new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SMART_CANCEL_KEY);
+
+        humanInteractionDetector =
+                new HumanInteractionDetector(this, () -> {
+                    if (mp != null) {
+                        mp.stop();
+                    }
+                });
+
         registerChargingStateReceiver();
 
-        SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
-        smartCancel = sharedPreferences.getBoolean(SMART_CANCEL_KEY, false);
+        smartCancelLive.observe(this, smartCancelEnabled -> {
+            if (smartCancelEnabled == null || !smartCancelEnabled) {
+                humanInteractionDetector.unregister();
+            } else {
+                humanInteractionDetector.register();
+            }
+        });
 
         sendSMS = sharedPreferences.getBoolean(SEND_SMS_KEY, false);
         phoneNumber = sharedPreferences.getString(PHONE_NUMBER_KEY, null);
         if (sendSMS && phoneNumber != null) {
             smsSender = new SMSSender(phoneNumber);
         }
-
-        humanInteractionDetector = new HumanInteractionDetector(this, () -> {
-            if(smartCancel && alarmIsOn) {
-                stopForeground(true);
-                stopSelf();
-            }
-        });
     }
 
     @Override
@@ -83,11 +99,13 @@ public class PowerFailureMonitoringService extends Service{
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        super.onBind(intent);
         return null;
     }
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         unregisterReceiver(receiver);
         destroyMediaPlayer();
         if (smsSender != null) {
@@ -179,12 +197,10 @@ public class PowerFailureMonitoringService extends Service{
             destroyMediaPlayer();
             initMediaPlayer();
             mp.start();
-            alarmIsOn = true;
         } else {
             if (mp != null) {
                 mp.stop();
             }
-            alarmIsOn = false;
         }
 
         if (smsSender != null) {

@@ -18,26 +18,24 @@ public class HumanInteractionDetector implements SensorEventListener {
     private float accelLast;
     private final OnDetectedCallback onDetectedCallback;
     private final SensorManager sensorManager;
+    private final Sensor accelerometer;
 
     public HumanInteractionDetector(@NonNull Context context,
                                     @NonNull OnDetectedCallback onDetectedCallback) {
         sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
-        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, accelerometer,
                 SensorManager.SENSOR_DELAY_NORMAL);
         accel = 0.00f;
         accelCurrent = SensorManager.GRAVITY_EARTH;
         accelLast = SensorManager.GRAVITY_EARTH;
         this.onDetectedCallback = onDetectedCallback;
-        sensorManager.registerListener(this, accelerometer,
-                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float[] gravity = event.values.clone();
-            // Shake detection
             float x = gravity[0];
             float y = gravity[1];
             float z = gravity[2];
@@ -53,6 +51,11 @@ public class HumanInteractionDetector implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) { }
+
+    public void register() {
+        sensorManager.registerListener(this, accelerometer,
+                SensorManager.SENSOR_DELAY_NORMAL);
+    }
 
     public void unregister() {
         sensorManager.unregisterListener(this);
