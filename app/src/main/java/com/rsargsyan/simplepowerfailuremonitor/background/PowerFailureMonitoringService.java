@@ -202,7 +202,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
             if (mp != null) {
                 mp.stop();
             }
-        } else {
+        } else if (phoneIsPlugged != null) {
             destroyMediaPlayer();
             initMediaPlayer();
             mp.start();
