@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,19 +55,35 @@ public class MainActivity extends AppCompatActivity {
                     (o ? R.drawable.ic_baseline_pause_24 : R.drawable.ic_baseline_play_arrow_24);
             binding.startStopMonitorFab.setImageResource(drawable);
             if (o) {
-                startMonitoringService();
-                Toast.makeText(this,
-                        "Monitoring has been started!", Toast.LENGTH_SHORT).show();
+                if (!isMyServiceRunning(PowerFailureMonitoringService.class)) {
+                    startMonitoringService();
+                    Toast.makeText(this,
+                            "Monitoring has been started!", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                stopService(new Intent(this, PowerFailureMonitoringService.class));
-                Toast.makeText(this,
-                        "Monitoring has been stopped!", Toast.LENGTH_SHORT).show();
+                if (isMyServiceRunning(PowerFailureMonitoringService.class)) {
+                    stopService(new Intent(this,
+                            PowerFailureMonitoringService.class));
+                    Toast.makeText(this,
+                            "Monitoring has been stopped!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         registerStartStopMonitorOnClickListener();
 
         registerChargingStateReceiver();
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service
+                : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void registerChargingStateReceiver() {
