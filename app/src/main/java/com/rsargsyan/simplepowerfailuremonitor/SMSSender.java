@@ -1,8 +1,8 @@
 package com.rsargsyan.simplepowerfailuremonitor;
 
-import android.telephony.SmsManager;
-
 import androidx.annotation.NonNull;
+
+import com.rsargsyan.simplepowerfailuremonitor.utils.SMSUtil;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,7 +23,7 @@ public class SMSSender implements PowerFailureObserver {
             previousState = powerIsOn;
             executor.submit(() -> {
                 final String msg = (powerIsOn ? "Power is on" : "Power is off");
-                sendSMS(phoneNumber, msg);
+                SMSUtil.sendSMS(phoneNumber, msg);
             });
         }
     }
@@ -33,14 +33,4 @@ public class SMSSender implements PowerFailureObserver {
         executor.shutdown();
     }
 
-    public void sendSMS(@NonNull String phoneNo, @NonNull String msg) {
-        try {
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(phoneNo, null, msg,
-                    null, null);
-            // TODO: write send status to DB and show the user
-        } catch (Exception ex) {
-            // TODO: same here
-        }
-    }
 }

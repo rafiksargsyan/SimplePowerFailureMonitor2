@@ -5,11 +5,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +26,8 @@ import com.rsargsyan.simplepowerfailuremonitor.background.PowerFailureMonitoring
 import com.rsargsyan.simplepowerfailuremonitor.R;
 import com.rsargsyan.simplepowerfailuremonitor.databinding.ActivityMainBinding;
 import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
+
+import static com.rsargsyan.simplepowerfailuremonitor.utils.ServiceUtil.isServiceRunning;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,19 +49,19 @@ public class MainActivity extends AppCompatActivity {
                 new ViewModelProvider(this, new MainAndroidViewModelFactory(getApplication()))
                         .get(MainViewModel.class);
 
-        mainViewModel.getMonitoringIsStarted().observe(this, (Observer<Boolean>) o -> {
+        mainViewModel.getMonitoringIsStarted().observe(this, o -> {
             if (o == null) o = Constants.MONITORING_STARTED_DEFAULT;
             @DrawableRes int drawable =
                     (o ? R.drawable.ic_baseline_pause_24 : R.drawable.ic_baseline_play_arrow_24);
             binding.startStopMonitorFab.setImageResource(drawable);
             if (o) {
-                if (!isMyServiceRunning(PowerFailureMonitoringService.class)) {
+                if (!isServiceRunning(this, PowerFailureMonitoringService.class)) {
                     startMonitoringService();
                     Toast.makeText(this,
                             "Monitoring has been started!", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                if (isMyServiceRunning(PowerFailureMonitoringService.class)) {
+                if (isServiceRunning(this, PowerFailureMonitoringService.class)) {
                     stopService(new Intent(this,
                             PowerFailureMonitoringService.class));
                     Toast.makeText(this,
@@ -70,20 +70,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mainViewModel.getIsPlugged().observe(this, isPlugged -> {
+            if (isPlugged) {
+                binding.chargingStateImageView.setImageDrawable(
+                        ContextCompat.getDrawable(MainActivity.this,
+                                R.drawable.ic_battery_charging_sharp_green_256dp));
+            } else {
+                binding.chargingStateImageView.setImageDrawable(
+                        ContextCompat.getDrawable(MainActivity.this,
+                                R.drawable.ic_battery_alert_sharp_red_256dp));
+            }
+        });
+
         registerStartStopMonitorOnClickListener();
 
         registerChargingStateReceiver();
-    }
-
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service
-                : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void registerChargingStateReceiver() {
@@ -143,15 +144,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             int pluggedValue = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-            if (0 == pluggedValue) {
-                binding.chargingStateImageView.setImageDrawable(
-                        ContextCompat.getDrawable(MainActivity.this,
-                                R.drawable.ic_battery_alert_sharp_red_256dp));
-            } else {
-                binding.chargingStateImageView.setImageDrawable(
-                        ContextCompat.getDrawable(MainActivity.this,
-                                R.drawable.ic_battery_charging_sharp_green_256dp));
-            }
+            mainViewModel.setIsPlugged(pluggedValue != 0);
         }
     }
 }
