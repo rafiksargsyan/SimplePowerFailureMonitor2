@@ -8,12 +8,55 @@
     <SwitchPreferenceCompat
         app:key="send_sms"
         app:title="Send SMS"
-        app:summary="Send SMS when power failure is detected" />
+        app:summary="Send SMS when power goes on/off" />
 
     <EditTextPreference
         app:key="phone_number"
         app:title="SMS recipient phone number"
-        app:defaultValue="077393100"
         app:useSimpleSummaryProvider="true"
         app:dependency="send_sms" />
+
+    <PreferenceCategory
+        app:key="email_settings"
+        app:title="Email settings">
+
+        <SwitchPreferenceCompat
+            app:key="send_email"
+            app:title="Send Email notification"
+            app:summaryOn="Enabled"
+            app:summaryOff="Disabled" />
+
+        <EditTextPreference
+            app:key="recipient_email_address"
+            app:title="Recipient email address"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_email" />
+
+        <SwitchPreferenceCompat
+            app:key="email_use_default"
+            app:title="Use default email settings"
+            app:summaryOn="Use default email address, password and SMTP server"
+            app:summaryOff="Use user specified email settings"
+            app:disableDependentsState="true"
+            app:dependency="send_email"/>
+
+        <EditTextPreference
+            app:key="smtp_server"
+            app:title="SMTP Server"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default" />
+
+        <EditTextPreference
+            app:key="email_address"
+            app:title="Email Address"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default" />
+
+        <EditTextPreference
+            app:key="email_password"
+            app:title="Email Password"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default" />
+
+    </PreferenceCategory>
 </PreferenceScreen>

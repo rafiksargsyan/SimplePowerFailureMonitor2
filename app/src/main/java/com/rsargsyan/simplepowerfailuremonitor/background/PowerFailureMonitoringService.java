@@ -36,20 +36,36 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import co.nedim.maildroidx.MaildroidX;
+import co.nedim.maildroidx.MaildroidXType;
+
 public class PowerFailureMonitoringService extends LifecycleService {
     private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
     private static final String SMART_CANCEL_KEY = "smart_cancel";
     private static final String SEND_SMS_KEY = "send_sms";
     private static final String PHONE_NUMBER_KEY = "phone_number";
+    private static final String SEND_EMAIL_KEY = "send_email";
+    private static final String RECIPIENT_EMAIL = "recipient_email_address";
+    private static final String USE_DEFAULT_EMAIL = "email_use_default";
+    private static final String SMTP_SERVER_KEY = "smtp_server";
+    private static final String SENDER_EMAIL_KEY = "email_address";
+    private static final String SENDER_EMAIL_PASSWORD = "email_password";
 
     private final ExecutorService smsSenderExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService emailSenderExecutor = Executors.newSingleThreadExecutor();
 
     private SharedPreferences sharedPreferences;
 
     private LiveData<Boolean> smartCancelLive;
     private LiveData<Boolean> sendSMSLive;
     private LiveData<String> phoneNumberLive;
+    private LiveData<Boolean> sendEmailLive;
+    private LiveData<String> recipientEmailAddress;
+    private LiveData<Boolean> useDefaultEmail;
+    private LiveData<String> smtpServer;
+    private LiveData<String> senderEmail;
+    private LiveData<String> senderPassword;
 
     private BroadcastReceiver receiver;
     private MediaPlayer mp;
@@ -72,6 +88,25 @@ public class PowerFailureMonitoringService extends LifecycleService {
         phoneNumberLive =
                 new SharedPreferenceLiveData<>(String.class, sharedPreferences, PHONE_NUMBER_KEY);
 
+        sendEmailLive =
+                new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SEND_EMAIL_KEY);
+
+        recipientEmailAddress =
+                new SharedPreferenceLiveData<>(String.class, sharedPreferences, RECIPIENT_EMAIL);
+
+        useDefaultEmail =
+                new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, USE_DEFAULT_EMAIL);
+
+        smtpServer =
+                new SharedPreferenceLiveData<>(String.class, sharedPreferences, SMTP_SERVER_KEY);
+
+        senderEmail =
+                new SharedPreferenceLiveData<>(String.class, sharedPreferences, SENDER_EMAIL_KEY);
+
+        senderPassword =
+                new SharedPreferenceLiveData<>(String.class, sharedPreferences,
+                        SENDER_EMAIL_PASSWORD);
+
         humanInteractionDetector =
                 new HumanInteractionDetector(this, () -> {
                     if (mp != null) {
@@ -89,8 +124,14 @@ public class PowerFailureMonitoringService extends LifecycleService {
             }
         });
 
-        sendSMSLive.observe(this, sendSMS -> { /*NOOP*/ });
-        phoneNumberLive.observe(this, phoneNumber -> { /*NOOP*/ });
+        sendSMSLive.observe(this, it -> { /*NOOP*/ });
+        phoneNumberLive.observe(this, it -> { /*NOOP*/ });
+        sendEmailLive.observe(this, it -> { /*NOOP*/ });
+        recipientEmailAddress.observe(this, it -> { /*NOOP*/ });
+        useDefaultEmail.observe(this, it -> { /*NOOP*/ });
+        smtpServer.observe(this, it -> { /*NOOP*/ });
+        senderEmail.observe(this, it -> { /*NOOP*/ });
+        senderPassword.observe(this, it -> { /*NOOP*/ });
     }
 
     @Override
@@ -113,6 +154,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
         destroyMediaPlayer();
         humanInteractionDetector.unregister();
         smsSenderExecutor.shutdown();
+        emailSenderExecutor.shutdown();
     }
 
     private void initMediaPlayer() {
@@ -209,8 +251,8 @@ public class PowerFailureMonitoringService extends LifecycleService {
         }
 
         if (shouldSendSMS(isPlugged)) {
+            final String phoneNumber = phoneNumberLive.getValue();
             smsSenderExecutor.submit(() -> {
-                final String phoneNumber = phoneNumberLive.getValue();
                 if (phoneNumber != null) {
                     final String msg = (isPlugged ? "Power is on" : "Power is off");
                     SMSUtil.sendSMS(phoneNumber, msg);
@@ -218,13 +260,64 @@ public class PowerFailureMonitoringService extends LifecycleService {
             });
         }
 
+        if (shouldSendEmail(isPlugged)) {
+            sendEmail();
+        }
+
         phoneIsPlugged = isPlugged;
+    }
+
+    private void sendEmail() {
+        String smtpServer = "smtp.gmail.com";
+        String smtpUsername = "simplepowerfailuremonitor@gmail.com";
+        String smtpPassword = "~/&LX)@5w9KS^2#>";
+        String port = "465";
+        final String to = recipientEmailAddress.getValue();
+        String from = smtpUsername;
+        String subject = "Power Failure Monitor";
+
+        if (!shouldUseDefaultEmail()) {
+            smtpServer = this.smtpServer.getValue();
+            smtpUsername = senderEmail.getValue();
+            smtpPassword = senderPassword.getValue();
+            from = smtpUsername;
+        }
+
+        final String smtpServerFinal = smtpServer;
+        final String smtpUsernameFinal = smtpUsername;
+        final String smtpPasswordFinal = smtpPassword;
+        final String fromFinal = from;
+
+        emailSenderExecutor.submit(() -> new MaildroidX.Builder()
+                .smtp(smtpServerFinal)
+                .smtpUsername(smtpUsernameFinal)
+                .smtpPassword(smtpPasswordFinal)
+                .port(port)
+                .type(MaildroidXType.PLAIN)
+                .to(to)
+                .from(fromFinal)
+                .subject(subject)
+                .body("TestBody")
+                .mail());
+    }
+
+    private boolean shouldUseDefaultEmail() {
+        final Boolean useDefault = useDefaultEmail.getValue();
+        return useDefault == null || useDefault;
     }
 
     private boolean shouldSendSMS(boolean isPlugged) {
         final Boolean sendSMS = sendSMSLive.getValue();
-        return sendSMS != null && sendSMS
-                && (phoneIsPlugged == null || phoneIsPlugged != isPlugged);
+        return sendSMS != null && sendSMS && plugStateChanged(isPlugged);
+    }
+
+    private boolean shouldSendEmail(boolean isPlugged) {
+        final Boolean sendEmail = sendEmailLive.getValue();
+        return sendEmail != null && sendEmail && plugStateChanged(isPlugged);
+    }
+
+    private boolean plugStateChanged(boolean isPlugged) {
+        return phoneIsPlugged == null || phoneIsPlugged != isPlugged;
     }
 
     private class ChargingStateReceiver extends BroadcastReceiver {
