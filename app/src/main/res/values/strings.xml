@@ -18,4 +18,10 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="alarm_settings_title">Alarm settings</string>
+    <string name="play_alarm_sound_title">Play alarm sound</string>
+    <string name="play_alarm_sound_summary">Play alarm sound when power goes off</string>
+    <string name="alarm_sound_smart_muting_title">Alarm sound smart muting</string>
+    <string name="alarm_smart_muting_summary">Automatically mute alarm sound when human interaction is detected</string>
+    <string name="sms_settings">SMS settings</string>
 </resources>

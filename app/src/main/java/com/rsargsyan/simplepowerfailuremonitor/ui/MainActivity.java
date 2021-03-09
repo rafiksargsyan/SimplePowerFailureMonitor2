@@ -20,8 +20,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.rsargsyan.simplepowerfailuremonitor.MainAndroidViewModelFactory;
-import com.rsargsyan.simplepowerfailuremonitor.MainViewModel;
+import com.rsargsyan.simplepowerfailuremonitor.viewmodel.MainAndroidViewModelFactory;
+import com.rsargsyan.simplepowerfailuremonitor.viewmodel.MainViewModel;
 import com.rsargsyan.simplepowerfailuremonitor.background.PowerFailureMonitoringService;
 import com.rsargsyan.simplepowerfailuremonitor.R;
 import com.rsargsyan.simplepowerfailuremonitor.databinding.ActivityMainBinding;

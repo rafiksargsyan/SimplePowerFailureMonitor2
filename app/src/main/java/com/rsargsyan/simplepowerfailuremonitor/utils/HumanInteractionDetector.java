@@ -1,4 +1,4 @@
-package com.rsargsyan.simplepowerfailuremonitor;
+package com.rsargsyan.simplepowerfailuremonitor.utils;
 
 import android.content.Context;
 import android.hardware.Sensor;

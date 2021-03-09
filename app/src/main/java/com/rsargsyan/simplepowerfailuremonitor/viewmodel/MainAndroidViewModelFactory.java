@@ -1,4 +1,4 @@
-package com.rsargsyan.simplepowerfailuremonitor;
+package com.rsargsyan.simplepowerfailuremonitor.viewmodel;
 
 import android.app.Application;
 

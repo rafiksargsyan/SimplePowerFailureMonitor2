@@ -1,8 +1,7 @@
-package com.rsargsyan.simplepowerfailuremonitor;
+package com.rsargsyan.simplepowerfailuremonitor.viewmodel;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.MutableContextWrapper;
 import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;

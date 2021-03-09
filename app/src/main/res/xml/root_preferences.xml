@@ -1,20 +1,34 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <SwitchPreferenceCompat
-        app:key="smart_cancel"
-        app:title="Smart cancellation"
-        app:summary="Automatically cancel alarms when human interaction is detected" />
+    <PreferenceCategory app:title="@string/alarm_settings_title">
 
-    <SwitchPreferenceCompat
-        app:key="send_sms"
-        app:title="Send SMS"
-        app:summary="Send SMS when power goes on/off" />
+        <SwitchPreferenceCompat
+            app:key="play_alarm_sound"
+            app:title="@string/play_alarm_sound_title"
+            app:summary="@string/play_alarm_sound_summary"
+            app:defaultValue="true" />
 
-    <EditTextPreference
-        app:key="phone_number"
-        app:title="SMS recipient phone number"
-        app:useSimpleSummaryProvider="true"
-        app:dependency="send_sms" />
+        <SwitchPreferenceCompat
+            app:key="smart_cancel"
+            app:title="@string/alarm_sound_smart_muting_title"
+            app:summary="@string/alarm_smart_muting_summary"
+            app:dependency="play_alarm_sound"
+            app:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sms_settings">
+        <SwitchPreferenceCompat
+            app:key="send_sms"
+            app:title="Send SMS"
+            app:summary="Send SMS when power goes on/off" />
+
+        <EditTextPreference
+            app:key="phone_number"
+            app:title="SMS recipient phone number"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_sms" />
+    </PreferenceCategory>
 
     <PreferenceCategory
         app:key="email_settings"

@@ -9,13 +9,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.BatteryManager;
 import android.os.IBinder;
-import android.provider.Settings;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -24,20 +22,22 @@ import androidx.lifecycle.LifecycleService;
 import androidx.lifecycle.LiveData;
 import androidx.preference.PreferenceManager;
 
-import com.rsargsyan.simplepowerfailuremonitor.HumanInteractionDetector;
+import com.rsargsyan.simplepowerfailuremonitor.utils.AlarmPlayer;
+import com.rsargsyan.simplepowerfailuremonitor.utils.HumanInteractionDetector;
 import com.rsargsyan.simplepowerfailuremonitor.R;
-import com.rsargsyan.simplepowerfailuremonitor.SharedPreferenceLiveData;
+import com.rsargsyan.simplepowerfailuremonitor.viewmodel.SharedPreferenceLiveData;
 import com.rsargsyan.simplepowerfailuremonitor.ui.MainActivity;
-import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
 import com.rsargsyan.simplepowerfailuremonitor.utils.DrawableUtil;
 import com.rsargsyan.simplepowerfailuremonitor.utils.SMSUtil;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import co.nedim.maildroidx.MaildroidX;
 import co.nedim.maildroidx.MaildroidXType;
+
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MAIN_NOTIFICATION_CHANNEL_ID;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PLAY_ALARM_SOUND_KEY;
 
 public class PowerFailureMonitoringService extends LifecycleService {
     private static final int NOTIFICATION_ID = 1; // magic number
@@ -55,9 +55,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private final ExecutorService smsSenderExecutor = Executors.newSingleThreadExecutor();
     private final ExecutorService emailSenderExecutor = Executors.newSingleThreadExecutor();
 
-    private SharedPreferences sharedPreferences;
-
-    private LiveData<Boolean> smartCancelLive;
+    private LiveData<Boolean> playAlarm;
     private LiveData<Boolean> sendSMSLive;
     private LiveData<String> phoneNumberLive;
     private LiveData<Boolean> sendEmailLive;
@@ -68,7 +66,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private LiveData<String> senderPassword;
 
     private BroadcastReceiver receiver;
-    private MediaPlayer mp;
+    private AlarmPlayer alarmPlayer;
     private Boolean phoneIsPlugged;
     private HumanInteractionDetector humanInteractionDetector;
 
@@ -76,11 +74,40 @@ public class PowerFailureMonitoringService extends LifecycleService {
     public void onCreate() {
         super.onCreate();
 
-        sharedPreferences =
+        registerChargingStateReceiver();
+
+        setupLiveData();
+
+        initHumanInteractionDetector();
+    }
+
+    private void initHumanInteractionDetector() {
+        humanInteractionDetector =
+                new HumanInteractionDetector(this, () -> {
+                    if (alarmPlayer != null) {
+                        alarmPlayer.stop();
+                    }
+                });
+    }
+
+    private void setupLiveData() {
+        SharedPreferences sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(this);
 
-        smartCancelLive =
+        playAlarm = new SharedPreferenceLiveData<>(Boolean.class,
+                sharedPreferences, PLAY_ALARM_SOUND_KEY);
+        playAlarm.observe(this, aBoolean -> {/*NOOP*/});
+
+        LiveData<Boolean> smartCancelLive =
                 new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SMART_CANCEL_KEY);
+
+        smartCancelLive.observe(this, smartCancelEnabled -> {
+            if (smartCancelEnabled == null || !smartCancelEnabled) {
+                humanInteractionDetector.unregister();
+            } else {
+                humanInteractionDetector.register();
+            }
+        });
 
         sendSMSLive =
                 new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SEND_SMS_KEY);
@@ -107,23 +134,6 @@ public class PowerFailureMonitoringService extends LifecycleService {
                 new SharedPreferenceLiveData<>(String.class, sharedPreferences,
                         SENDER_EMAIL_PASSWORD);
 
-        humanInteractionDetector =
-                new HumanInteractionDetector(this, () -> {
-                    if (mp != null) {
-                        mp.stop();
-                    }
-                });
-
-        registerChargingStateReceiver();
-
-        smartCancelLive.observe(this, smartCancelEnabled -> {
-            if (smartCancelEnabled == null || !smartCancelEnabled) {
-                humanInteractionDetector.unregister();
-            } else {
-                humanInteractionDetector.register();
-            }
-        });
-
         sendSMSLive.observe(this, it -> { /*NOOP*/ });
         phoneNumberLive.observe(this, it -> { /*NOOP*/ });
         sendEmailLive.observe(this, it -> { /*NOOP*/ });
@@ -142,7 +152,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
 
     @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
+    public IBinder onBind(@NonNull Intent intent) {
         super.onBind(intent);
         return null;
     }
@@ -151,37 +161,16 @@ public class PowerFailureMonitoringService extends LifecycleService {
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(receiver);
-        destroyMediaPlayer();
+        destroyAlarmPlayer();
         humanInteractionDetector.unregister();
         smsSenderExecutor.shutdown();
         emailSenderExecutor.shutdown();
     }
 
-    private void initMediaPlayer() {
-        try {
-            initMediaPlayer1();
-        } catch (IOException e) {
-            initMediaPlayer2();
+    private void destroyAlarmPlayer() {
+        if (alarmPlayer != null) {
+            alarmPlayer.stop();
         }
-    }
-
-    private void initMediaPlayer2() {
-        mp = MediaPlayer.create(getApplicationContext(), Settings.System.DEFAULT_ALARM_ALERT_URI);
-        mp.setLooping(true);
-    }
-
-    private void initMediaPlayer1() throws IOException {
-        mp = new MediaPlayer();
-        mp.setLooping(true);
-        mp.setDataSource(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-        mp.setAudioStreamType(AudioManager.STREAM_ALARM);
-        mp.prepare();
-    }
-
-    private void destroyMediaPlayer() {
-         if (mp != null) {
-             mp.release();
-         }
     }
 
     private void registerChargingStateReceiver() {
@@ -221,7 +210,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private Notification createNotification(String contentTitle, Bitmap largeIcon,
                                             PendingIntent intent) {
         return new NotificationCompat.Builder(this,
-                Constants.MAIN_NOTIFICATION_CHANNEL_ID)
+                MAIN_NOTIFICATION_CHANNEL_ID)
                 .setOngoing(true)
                 .setContentTitle(contentTitle)
                 .setContentText("Click to manage")
@@ -240,14 +229,13 @@ public class PowerFailureMonitoringService extends LifecycleService {
         Notification notification = createNotification(isPlugged);
         NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification);
 
-        if (isPlugged) {
-            if (mp != null) {
-                mp.stop();
+        if (shouldPlayAlarm(isPlugged)) {
+            if (alarmPlayer == null) {
+                alarmPlayer = new AlarmPlayer(this);
             }
-        } else if (phoneIsPlugged != null) {
-            destroyMediaPlayer();
-            initMediaPlayer();
-            mp.start();
+            alarmPlayer.play();
+        } else if (alarmPlayer != null){
+            alarmPlayer.stop();
         }
 
         if (shouldSendSMS(isPlugged)) {
@@ -261,20 +249,21 @@ public class PowerFailureMonitoringService extends LifecycleService {
         }
 
         if (shouldSendEmail(isPlugged)) {
-            sendEmail();
+            final String emailBody = (isPlugged ? "Power is on" : "Power is off");
+            sendEmail(emailBody);
         }
 
         phoneIsPlugged = isPlugged;
     }
 
-    private void sendEmail() {
+    private void sendEmail(String body) {
         String smtpServer = "smtp.gmail.com";
         String smtpUsername = "simplepowerfailuremonitor@gmail.com";
         String smtpPassword = "~/&LX)@5w9KS^2#>";
         String port = "465";
         final String to = recipientEmailAddress.getValue();
         String from = smtpUsername;
-        String subject = "Power Failure Monitor";
+        String subject = "Power state changed";
 
         if (!shouldUseDefaultEmail()) {
             smtpServer = this.smtpServer.getValue();
@@ -297,7 +286,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
                 .to(to)
                 .from(fromFinal)
                 .subject(subject)
-                .body("TestBody")
+                .body(body)
                 .mail());
     }
 
@@ -314,6 +303,12 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private boolean shouldSendEmail(boolean isPlugged) {
         final Boolean sendEmail = sendEmailLive.getValue();
         return sendEmail != null && sendEmail && plugStateChanged(isPlugged);
+    }
+
+    private boolean shouldPlayAlarm(boolean isPlugged) {
+        final Boolean playAlarmValue = playAlarm.getValue();
+        return (playAlarmValue == null || playAlarmValue)
+                && plugStateChanged(isPlugged) && !isPlugged;
     }
 
     private boolean plugStateChanged(boolean isPlugged) {
