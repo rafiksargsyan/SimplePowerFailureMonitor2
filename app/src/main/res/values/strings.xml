@@ -24,4 +24,12 @@
     <string name="alarm_sound_smart_muting_title">Alarm sound smart muting</string>
     <string name="alarm_smart_muting_summary">Automatically mute alarm sound when human interaction is detected</string>
     <string name="sms_settings">SMS settings</string>
+    <string name="power_is_off">Power is off</string>
+    <string name="power_is_on">Power is on</string>
+    <string name="power_off_msg_title">Power off message</string>
+    <string name="power_on_msg_title">Power on message</string>
+    <string name="send_sms_title">Send SMS</string>
+    <string name="disabled">Disabled</string>
+    <string name="enabled">Enabled</string>
+    <string name="recipient_phone_number">Recipient phone number</string>
 </resources>

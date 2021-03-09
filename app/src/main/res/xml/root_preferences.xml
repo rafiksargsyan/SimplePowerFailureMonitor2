@@ -18,16 +18,33 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/sms_settings">
+
         <SwitchPreferenceCompat
             app:key="send_sms"
-            app:title="Send SMS"
-            app:summary="Send SMS when power goes on/off" />
+            app:title="@string/send_sms_title"
+            app:summaryOff="@string/disabled"
+            app:summaryOn="@string/enabled" />
 
         <EditTextPreference
             app:key="phone_number"
-            app:title="SMS recipient phone number"
+            app:title="@string/recipient_phone_number"
             app:useSimpleSummaryProvider="true"
             app:dependency="send_sms" />
+
+        <EditTextPreference
+            app:key="power_off_msg"
+            app:title="@string/power_off_msg_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_sms"
+            app:defaultValue="@string/power_is_off" />
+
+        <EditTextPreference
+            app:key="power_on_msg"
+            app:title="@string/power_on_msg_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_sms"
+            app:defaultValue="@string/power_is_on" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

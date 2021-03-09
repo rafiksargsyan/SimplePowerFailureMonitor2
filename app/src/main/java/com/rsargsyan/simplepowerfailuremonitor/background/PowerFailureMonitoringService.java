@@ -36,15 +36,17 @@ import java.util.concurrent.Executors;
 import co.nedim.maildroidx.MaildroidX;
 import co.nedim.maildroidx.MaildroidXType;
 
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_SMART_MUTE_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MAIN_NOTIFICATION_CHANNEL_ID;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PHONE_NUMBER_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PLAY_ALARM_SOUND_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.POWER_OFF_MSG_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.POWER_ON_MSG_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SEND_SMS_KEY;
 
 public class PowerFailureMonitoringService extends LifecycleService {
     private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
-    private static final String SMART_CANCEL_KEY = "smart_cancel";
-    private static final String SEND_SMS_KEY = "send_sms";
-    private static final String PHONE_NUMBER_KEY = "phone_number";
     private static final String SEND_EMAIL_KEY = "send_email";
     private static final String RECIPIENT_EMAIL = "recipient_email_address";
     private static final String USE_DEFAULT_EMAIL = "email_use_default";
@@ -56,8 +58,10 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private final ExecutorService emailSenderExecutor = Executors.newSingleThreadExecutor();
 
     private LiveData<Boolean> playAlarm;
-    private LiveData<Boolean> sendSMSLive;
-    private LiveData<String> phoneNumberLive;
+    private LiveData<Boolean> sendSMS;
+    private LiveData<String> phoneNumber;
+    private LiveData<String> powerOffMsg;
+    private LiveData<String> powerOnMsg;
     private LiveData<Boolean> sendEmailLive;
     private LiveData<String> recipientEmailAddress;
     private LiveData<Boolean> useDefaultEmail;
@@ -96,24 +100,32 @@ public class PowerFailureMonitoringService extends LifecycleService {
 
         playAlarm = new SharedPreferenceLiveData<>(Boolean.class,
                 sharedPreferences, PLAY_ALARM_SOUND_KEY);
-        playAlarm.observe(this, aBoolean -> {/*NOOP*/});
+        playAlarm.observe(this, it -> {/*NOOP*/});
 
-        LiveData<Boolean> smartCancelLive =
-                new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SMART_CANCEL_KEY);
-
-        smartCancelLive.observe(this, smartCancelEnabled -> {
-            if (smartCancelEnabled == null || !smartCancelEnabled) {
+        LiveData<Boolean> smartMute = new SharedPreferenceLiveData<>(Boolean.class,
+                sharedPreferences, ALARM_SOUND_SMART_MUTE_KEY);
+        smartMute.observe(this, smartMuteEnabled -> {
+            if (smartMuteEnabled == null || !smartMuteEnabled) {
                 humanInteractionDetector.unregister();
             } else {
                 humanInteractionDetector.register();
             }
         });
 
-        sendSMSLive =
-                new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SEND_SMS_KEY);
+        sendSMS = new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SEND_SMS_KEY);
+        sendSMS.observe(this, it -> { /*NOOP*/ });
 
-        phoneNumberLive =
+        phoneNumber =
                 new SharedPreferenceLiveData<>(String.class, sharedPreferences, PHONE_NUMBER_KEY);
+        phoneNumber.observe(this, it -> { /*NOOP*/ });
+
+        powerOffMsg =
+                new SharedPreferenceLiveData<>(String.class, sharedPreferences, POWER_OFF_MSG_KEY);
+        powerOffMsg.observe(this, it -> { /*NOOP*/ });
+
+        powerOnMsg =
+                new SharedPreferenceLiveData<>(String.class, sharedPreferences, POWER_ON_MSG_KEY);
+        powerOnMsg.observe(this, it -> { /*NOOP*/ });
 
         sendEmailLive =
                 new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SEND_EMAIL_KEY);
@@ -134,8 +146,6 @@ public class PowerFailureMonitoringService extends LifecycleService {
                 new SharedPreferenceLiveData<>(String.class, sharedPreferences,
                         SENDER_EMAIL_PASSWORD);
 
-        sendSMSLive.observe(this, it -> { /*NOOP*/ });
-        phoneNumberLive.observe(this, it -> { /*NOOP*/ });
         sendEmailLive.observe(this, it -> { /*NOOP*/ });
         recipientEmailAddress.observe(this, it -> { /*NOOP*/ });
         useDefaultEmail.observe(this, it -> { /*NOOP*/ });
@@ -239,13 +249,11 @@ public class PowerFailureMonitoringService extends LifecycleService {
         }
 
         if (shouldSendSMS(isPlugged)) {
-            final String phoneNumber = phoneNumberLive.getValue();
-            smsSenderExecutor.submit(() -> {
-                if (phoneNumber != null) {
-                    final String msg = (isPlugged ? "Power is on" : "Power is off");
-                    SMSUtil.sendSMS(phoneNumber, msg);
-                }
-            });
+            final String phoneNumberValue = phoneNumber.getValue();
+            final String msg =
+                    SMSUtil.getSMSMsg(this, isPlugged,
+                            powerOffMsg.getValue(), powerOnMsg.getValue());
+            smsSenderExecutor.submit(() -> SMSUtil.sendSMS(phoneNumberValue, msg));
         }
 
         if (shouldSendEmail(isPlugged)) {
@@ -296,8 +304,8 @@ public class PowerFailureMonitoringService extends LifecycleService {
     }
 
     private boolean shouldSendSMS(boolean isPlugged) {
-        final Boolean sendSMS = sendSMSLive.getValue();
-        return sendSMS != null && sendSMS && plugStateChanged(isPlugged);
+        final Boolean sendSMSValue = sendSMS.getValue();
+        return sendSMSValue != null && sendSMSValue && plugStateChanged(isPlugged);
     }
 
     private boolean shouldSendEmail(boolean isPlugged) {
