@@ -37,22 +37,30 @@ import co.nedim.maildroidx.MaildroidX;
 import co.nedim.maildroidx.MaildroidXType;
 
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_SMART_MUTE_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_EMAIL_SUBJECT;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PASSWORD;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PORT;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_SERVER;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_USERNAME;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.EMAIL_USE_DEFAULT_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MAIN_NOTIFICATION_CHANNEL_ID;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PHONE_NUMBER_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PLAY_ALARM_SOUND_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.POWER_OFF_BODY_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.POWER_OFF_MSG_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.POWER_ON_BODY_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.POWER_ON_MSG_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.RECIPIENT_EMAIL_ADDRESS_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SENDER_EMAIL_ADDRESS_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SENDER_EMAIL_PASSWORD_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SEND_EMAIL_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SEND_SMS_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMTP_PORT_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMTP_SERVER_KEY;
 
 public class PowerFailureMonitoringService extends LifecycleService {
     private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
-    private static final String SEND_EMAIL_KEY = "send_email";
-    private static final String RECIPIENT_EMAIL = "recipient_email_address";
-    private static final String USE_DEFAULT_EMAIL = "email_use_default";
-    private static final String SMTP_SERVER_KEY = "smtp_server";
-    private static final String SENDER_EMAIL_KEY = "email_address";
-    private static final String SENDER_EMAIL_PASSWORD = "email_password";
 
     private final ExecutorService smsSenderExecutor = Executors.newSingleThreadExecutor();
     private final ExecutorService emailSenderExecutor = Executors.newSingleThreadExecutor();
@@ -62,12 +70,16 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private LiveData<String> phoneNumber;
     private LiveData<String> powerOffMsg;
     private LiveData<String> powerOnMsg;
-    private LiveData<Boolean> sendEmailLive;
+
+    private LiveData<Boolean> sendEmail;
     private LiveData<String> recipientEmailAddress;
     private LiveData<Boolean> useDefaultEmail;
     private LiveData<String> smtpServer;
-    private LiveData<String> senderEmail;
+    private LiveData<String> smtpPort;
+    private LiveData<String> senderEmailAddress;
     private LiveData<String> senderPassword;
+    private LiveData<String> powerOffBody;
+    private LiveData<String> powerOnBody;
 
     private BroadcastReceiver receiver;
     private AlarmPlayer alarmPlayer;
@@ -127,31 +139,42 @@ public class PowerFailureMonitoringService extends LifecycleService {
                 new SharedPreferenceLiveData<>(String.class, sharedPreferences, POWER_ON_MSG_KEY);
         powerOnMsg.observe(this, it -> { /*NOOP*/ });
 
-        sendEmailLive =
+        sendEmail =
                 new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, SEND_EMAIL_KEY);
+        sendEmail.observe(this, it -> { /*NOOP*/ });
 
-        recipientEmailAddress =
-                new SharedPreferenceLiveData<>(String.class, sharedPreferences, RECIPIENT_EMAIL);
+        recipientEmailAddress = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, RECIPIENT_EMAIL_ADDRESS_KEY);
+        recipientEmailAddress.observe(this, it -> { /*NOOP*/ });
 
-        useDefaultEmail =
-                new SharedPreferenceLiveData<>(Boolean.class, sharedPreferences, USE_DEFAULT_EMAIL);
+        useDefaultEmail = new SharedPreferenceLiveData<>(Boolean.class,
+                sharedPreferences, EMAIL_USE_DEFAULT_KEY);
+        useDefaultEmail.observe(this, it -> { /*NOOP*/ });
 
-        smtpServer =
-                new SharedPreferenceLiveData<>(String.class, sharedPreferences, SMTP_SERVER_KEY);
+        smtpServer = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, SMTP_SERVER_KEY);
+        smtpServer.observe(this, it -> { /*NOOP*/ });
 
-        senderEmail =
-                new SharedPreferenceLiveData<>(String.class, sharedPreferences, SENDER_EMAIL_KEY);
+        smtpPort = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, SMTP_PORT_KEY);
+        smtpPort.observe(this, it -> { /*NOOP*/ });
+
+        senderEmailAddress = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, SENDER_EMAIL_ADDRESS_KEY);
+        senderEmailAddress.observe(this, it -> { /*NOOP*/ });
 
         senderPassword =
                 new SharedPreferenceLiveData<>(String.class, sharedPreferences,
-                        SENDER_EMAIL_PASSWORD);
-
-        sendEmailLive.observe(this, it -> { /*NOOP*/ });
-        recipientEmailAddress.observe(this, it -> { /*NOOP*/ });
-        useDefaultEmail.observe(this, it -> { /*NOOP*/ });
-        smtpServer.observe(this, it -> { /*NOOP*/ });
-        senderEmail.observe(this, it -> { /*NOOP*/ });
+                        SENDER_EMAIL_PASSWORD_KEY);
         senderPassword.observe(this, it -> { /*NOOP*/ });
+
+        powerOffBody = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, POWER_OFF_BODY_KEY);
+        powerOffBody.observe(this, it -> { /*NOOP*/ });
+
+        powerOnBody = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, POWER_ON_BODY_KEY);
+        powerOnBody.observe(this, it -> { /*NOOP*/ });
     }
 
     @Override
@@ -257,7 +280,9 @@ public class PowerFailureMonitoringService extends LifecycleService {
         }
 
         if (shouldSendEmail(isPlugged)) {
-            final String emailBody = (isPlugged ? "Power is on" : "Power is off");
+            final String emailBody =
+                    SMSUtil.getSMSMsg(this, isPlugged,
+                            powerOffBody.getValue(), powerOnBody.getValue());
             sendEmail(emailBody);
         }
 
@@ -265,18 +290,18 @@ public class PowerFailureMonitoringService extends LifecycleService {
     }
 
     private void sendEmail(String body) {
-        String smtpServer = "smtp.gmail.com";
-        String smtpUsername = "simplepowerfailuremonitor@gmail.com";
-        String smtpPassword = "~/&LX)@5w9KS^2#>";
-        String port = "465";
+        String smtpServer = DEFAULT_SMTP_SERVER;
+        String smtpUsername = DEFAULT_SMTP_USERNAME;
+        String smtpPassword = DEFAULT_SMTP_PASSWORD;
+        String port = DEFAULT_SMTP_PORT;
         final String to = recipientEmailAddress.getValue();
         String from = smtpUsername;
-        String subject = "Power state changed";
 
         if (!shouldUseDefaultEmail()) {
             smtpServer = this.smtpServer.getValue();
-            smtpUsername = senderEmail.getValue();
+            smtpUsername = senderEmailAddress.getValue();
             smtpPassword = senderPassword.getValue();
+            port = smtpPort.getValue();
             from = smtpUsername;
         }
 
@@ -284,16 +309,17 @@ public class PowerFailureMonitoringService extends LifecycleService {
         final String smtpUsernameFinal = smtpUsername;
         final String smtpPasswordFinal = smtpPassword;
         final String fromFinal = from;
+        final String portFinal = port;
 
         emailSenderExecutor.submit(() -> new MaildroidX.Builder()
                 .smtp(smtpServerFinal)
                 .smtpUsername(smtpUsernameFinal)
                 .smtpPassword(smtpPasswordFinal)
-                .port(port)
+                .port(portFinal)
                 .type(MaildroidXType.PLAIN)
                 .to(to)
                 .from(fromFinal)
-                .subject(subject)
+                .subject(DEFAULT_EMAIL_SUBJECT)
                 .body(body)
                 .mail());
     }
@@ -309,8 +335,8 @@ public class PowerFailureMonitoringService extends LifecycleService {
     }
 
     private boolean shouldSendEmail(boolean isPlugged) {
-        final Boolean sendEmail = sendEmailLive.getValue();
-        return sendEmail != null && sendEmail && plugStateChanged(isPlugged);
+        final Boolean sendEmailValue = sendEmail.getValue();
+        return sendEmailValue != null && sendEmailValue && plugStateChanged(isPlugged);
     }
 
     private boolean shouldPlayAlarm(boolean isPlugged) {

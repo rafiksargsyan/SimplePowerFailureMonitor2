@@ -47,47 +47,70 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        app:key="email_settings"
-        app:title="Email settings">
+    <PreferenceCategory app:title="@string/email_settings">
 
         <SwitchPreferenceCompat
             app:key="send_email"
-            app:title="Send Email notification"
-            app:summaryOn="Enabled"
-            app:summaryOff="Disabled" />
+            app:title="@string/send_email_title"
+            app:summaryOn="@string/enabled"
+            app:summaryOff="@string/disabled"
+            app:defaultValue="false" />
 
         <EditTextPreference
             app:key="recipient_email_address"
-            app:title="Recipient email address"
+            app:title="@string/recipient_email_address_title"
             app:useSimpleSummaryProvider="true"
             app:dependency="send_email" />
 
+        <EditTextPreference
+            app:key="power_off_body"
+            app:title="@string/power_off_email_body_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_email"
+            app:defaultValue="@string/power_is_off" />
+
+        <EditTextPreference
+            app:key="power_on_body"
+            app:title="@string/power_on_email_body"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_email"
+            app:defaultValue="@string/power_is_on" />
+
         <SwitchPreferenceCompat
             app:key="email_use_default"
-            app:title="Use default email settings"
-            app:summaryOn="Use default email address, password and SMTP server"
-            app:summaryOff="Use user specified email settings"
+            app:title="Use default email sender"
+            app:summaryOn="@string/email_use_default_summary_on"
+            app:summaryOff="@string/email_use_default_summary_off"
             app:disableDependentsState="true"
             app:dependency="send_email"/>
 
         <EditTextPreference
             app:key="smtp_server"
-            app:title="SMTP Server"
+            app:title="@string/smtp_server_title"
             app:useSimpleSummaryProvider="true"
-            app:dependency="email_use_default" />
+            app:dependency="email_use_default"
+            app:defaultValue="smtp.google.com" />
+
+        <EditTextPreference
+            app:key="smtp_port"
+            app:title="SMTP port"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default"
+            app:defaultValue="465" />
 
         <EditTextPreference
             app:key="email_address"
-            app:title="Email Address"
+            app:title="@string/sender_email_address_title"
             app:useSimpleSummaryProvider="true"
-            app:dependency="email_use_default" />
+            app:dependency="email_use_default"
+            app:defaultValue="" />
 
         <EditTextPreference
             app:key="email_password"
-            app:title="Email Password"
+            app:title="@string/sender_email_password_title"
             app:useSimpleSummaryProvider="true"
-            app:dependency="email_use_default" />
+            app:dependency="email_use_default"
+            app:defaultValue="" />
 
     </PreferenceCategory>
 </PreferenceScreen>

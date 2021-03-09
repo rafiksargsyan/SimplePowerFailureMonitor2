@@ -32,4 +32,14 @@
     <string name="disabled">Disabled</string>
     <string name="enabled">Enabled</string>
     <string name="recipient_phone_number">Recipient phone number</string>
+    <string name="email_settings">Email settings</string>
+    <string name="send_email_title">Send email</string>
+    <string name="recipient_email_address_title">Recipient email address</string>
+    <string name="power_off_email_body_title">Power off email body</string>
+    <string name="power_on_email_body">Power on email body</string>
+    <string name="smtp_server_title">SMTP Server</string>
+    <string name="sender_email_address_title">Sender email address</string>
+    <string name="sender_email_password_title">Sender email password</string>
+    <string name="email_use_default_summary_off">User specified settings will be used to send email messages</string>
+    <string name="email_use_default_summary_on">simplepowerfailuremonitor@gmail.com will be used to send email messages</string>
 </resources>
