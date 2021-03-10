@@ -5,6 +5,8 @@ public class Constants {
     public static final String MONITORING_PREFERENCES = "monitoring_preferences";
     public static final String MONITORING_STARTED_KEY = "MONITORING_STARTED";
     public static final boolean MONITORING_STARTED_DEFAULT = false;
+    public static final int MONITORING_NOTIFICATION_ID = 1;
+    public static final int SMS_ALARM_NOTIFICATION_ID = 2;
 
     // Alarm preferences
     public static final String PLAY_ALARM_SOUND_KEY = "play_alarm_sound";
@@ -33,5 +35,8 @@ public class Constants {
     public static final String DEFAULT_SMTP_PASSWORD = "~/&LX)@5w9KS^2#>";
     public static final String DEFAULT_SMTP_PORT = "465";
     public static final String DEFAULT_EMAIL_SUBJECT = "Power state changed";
+
+    public static final String ACTION_CANCEL_SMS_ALARM =
+            "com.rsargsyan.simplepowerfailuremonitor.ACTION_CANCEL_SMS_ALARM";
 
 }

@@ -44,6 +44,7 @@ import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SM
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_USERNAME;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.EMAIL_USE_DEFAULT_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MAIN_NOTIFICATION_CHANNEL_ID;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MONITORING_NOTIFICATION_ID;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PHONE_NUMBER_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PLAY_ALARM_SOUND_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.POWER_OFF_BODY_KEY;
@@ -59,7 +60,6 @@ import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMTP_PORT_
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMTP_SERVER_KEY;
 
 public class PowerFailureMonitoringService extends LifecycleService {
-    private static final int NOTIFICATION_ID = 1; // magic number
     private static final int DUMMY_REQUEST_CODE = 0;
 
     private final ExecutorService smsSenderExecutor = Executors.newSingleThreadExecutor();
@@ -231,7 +231,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
 
     private void bringToForeground() {
         Notification notification = createNotification(phoneIsPlugged);
-        startForeground(NOTIFICATION_ID, notification);
+        startForeground(MONITORING_NOTIFICATION_ID, notification);
     }
 
     private PendingIntent createMainActivityIntent() {
@@ -242,8 +242,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
 
     private Notification createNotification(String contentTitle, Bitmap largeIcon,
                                             PendingIntent intent) {
-        return new NotificationCompat.Builder(this,
-                MAIN_NOTIFICATION_CHANNEL_ID)
+        return new NotificationCompat.Builder(this, MAIN_NOTIFICATION_CHANNEL_ID)
                 .setOngoing(true)
                 .setContentTitle(contentTitle)
                 .setContentText("Click to manage")
@@ -260,7 +259,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
         }
 
         Notification notification = createNotification(isPlugged);
-        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification);
+        NotificationManagerCompat.from(this).notify(MONITORING_NOTIFICATION_ID, notification);
 
         if (shouldPlayAlarm(isPlugged)) {
             if (alarmPlayer == null) {

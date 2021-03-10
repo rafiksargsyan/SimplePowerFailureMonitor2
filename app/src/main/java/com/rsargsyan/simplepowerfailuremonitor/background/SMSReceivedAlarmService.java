@@ -1,0 +1,63 @@
+package com.rsargsyan.simplepowerfailuremonitor.background;
+
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Intent;
+
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LifecycleService;
+
+import com.rsargsyan.simplepowerfailuremonitor.R;
+import com.rsargsyan.simplepowerfailuremonitor.utils.AlarmPlayer;
+
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ACTION_CANCEL_SMS_ALARM;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MAIN_NOTIFICATION_CHANNEL_ID;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_ALARM_NOTIFICATION_ID;
+
+public class SMSReceivedAlarmService extends LifecycleService {
+    private AlarmPlayer alarmPlayer;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Intent cancelIntent = new Intent(this, SMSReceivedAlarmService.class);
+        cancelIntent.setAction(ACTION_CANCEL_SMS_ALARM);
+        PendingIntent cancelPendingIntent =
+                PendingIntent.getService(this, 0, cancelIntent, 0);
+
+        Notification smsAlarmNotification =
+                new NotificationCompat.Builder(this, MAIN_NOTIFICATION_CHANNEL_ID)
+                        .setOngoing(true)
+                        .setContentTitle("TestTitle")
+                        .setContentText("TestText")
+                        .setSilent(true)
+                        .setSmallIcon(R.drawable.ic_bolt_black_24dp)
+                        .addAction(R.drawable.ic_bolt_black_24dp, "CANCEL", cancelPendingIntent)
+                        .build();
+
+        startForeground(SMS_ALARM_NOTIFICATION_ID, smsAlarmNotification);
+        if (alarmPlayer == null) {
+            alarmPlayer = new AlarmPlayer(this);
+        }
+        alarmPlayer.play();
+    }
+
+    @Override
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_CANCEL_SMS_ALARM.equals(intent.getAction())) {
+            stopForeground(true);
+            stopSelf();
+        }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (alarmPlayer != null) {
+            alarmPlayer.stop();
+        }
+        super.onDestroy();
+    }
+}
