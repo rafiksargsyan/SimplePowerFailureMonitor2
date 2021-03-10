@@ -342,7 +342,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private boolean shouldPlayAlarm(boolean isPlugged) {
         final Boolean playAlarmValue = playAlarm.getValue();
         return (playAlarmValue == null || playAlarmValue)
-                && plugStateChanged(isPlugged) && !isPlugged;
+                && phoneIsPlugged != null && phoneIsPlugged && !isPlugged;
     }
 
     private boolean plugStateChanged(boolean isPlugged) {
