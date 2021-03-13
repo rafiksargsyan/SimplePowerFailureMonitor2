@@ -3,11 +3,8 @@ package com.rsargsyan.simplepowerfailuremonitor.background;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LifecycleService;
 

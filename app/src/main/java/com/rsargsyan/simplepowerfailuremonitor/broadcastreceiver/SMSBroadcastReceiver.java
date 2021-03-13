@@ -5,11 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.os.Bundle;
-import android.telephony.SmsMessage;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.preference.PreferenceManager;
 
 import com.rsargsyan.simplepowerfailuremonitor.background.SMSReceivedAlarmService;
