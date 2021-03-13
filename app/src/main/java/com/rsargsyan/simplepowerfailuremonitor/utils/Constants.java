@@ -2,6 +2,7 @@ package com.rsargsyan.simplepowerfailuremonitor.utils;
 
 public class Constants {
     public static final String MAIN_NOTIFICATION_CHANNEL_ID = "MAIN_NOTIFICATION";
+    public static final String SMS_ALARM_NOTIFICATION_CHANNEL_ID = "SMS_ALARM_NOTIFICATION_CHANNEL";
     public static final String MONITORING_PREFERENCES = "monitoring_preferences";
     public static final String MONITORING_STARTED_KEY = "MONITORING_STARTED";
     public static final boolean MONITORING_STARTED_DEFAULT = false;
@@ -36,7 +37,12 @@ public class Constants {
     public static final String DEFAULT_SMTP_PORT = "465";
     public static final String DEFAULT_EMAIL_SUBJECT = "Power state changed";
 
+    // SMS alarm settings
+    public static final String SMS_ALARM_KEY = "sms_alarm";
+    public static final String ALARMING_MESSAGE_KEY = "alarming_message";
+
     public static final String ACTION_CANCEL_SMS_ALARM =
             "com.rsargsyan.simplepowerfailuremonitor.ACTION_CANCEL_SMS_ALARM";
+    public static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
 
 }

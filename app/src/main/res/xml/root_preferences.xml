@@ -113,4 +113,20 @@
             app:defaultValue="" />
 
     </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sms_alarm_settings">
+        <SwitchPreferenceCompat
+            app:key="sms_alarm"
+            app:title="@string/sms_alarm_title"
+            app:defaultValue="false"
+            app:summaryOn="@string/enabled"
+            app:summaryOff="@string/disabled" />
+
+        <EditTextPreference
+            app:key="alarming_message"
+            app:title="@string/alarming_message_title"
+            app:defaultValue="@string/power_is_off"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="sms_alarm" />
+    </PreferenceCategory>
 </PreferenceScreen>

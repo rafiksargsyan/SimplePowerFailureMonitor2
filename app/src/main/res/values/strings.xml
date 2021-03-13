@@ -42,4 +42,7 @@
     <string name="sender_email_password_title">Sender email password</string>
     <string name="email_use_default_summary_off">User specified settings will be used to send email messages</string>
     <string name="email_use_default_summary_on">simplepowerfailuremonitor@gmail.com will be used to send email messages</string>
+    <string name="sms_alarm_settings">SMS alarm settings</string>
+    <string name="alarming_message_title">Alarming SMS text</string>
+    <string name="sms_alarm_title">Alarm when SMS received</string>
 </resources>

@@ -1,7 +1,10 @@
 package com.rsargsyan.simplepowerfailuremonitor.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
 
 import androidx.annotation.NonNull;
 
@@ -30,5 +33,30 @@ public class SMSUtil {
         }
         String result = (isPlugged ? powerOnMsg : powerOffMsg);
         return result;
+    }
+
+    public static SmsMessage[]  getSmsMessagesFromIntent(Intent intent) {
+        Bundle bundle = intent.getExtras();
+        SmsMessage[] msgs = null;
+        if (bundle != null) {
+            Object[] pdus = (Object[]) bundle.get("pdus");
+            if (pdus == null) return new SmsMessage[0];
+            msgs = new SmsMessage[pdus.length];
+            for (int i = 0; i < msgs.length; ++i) {
+                msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
+            }
+        }
+        return msgs;
+    }
+
+    public static boolean smsContainsText(@NonNull Intent intent,
+                                          @NonNull String text) {
+        for (SmsMessage sms : getSmsMessagesFromIntent(intent)) {
+            final String msg = sms.getMessageBody();
+            if (msg != null && msg.contains(text)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

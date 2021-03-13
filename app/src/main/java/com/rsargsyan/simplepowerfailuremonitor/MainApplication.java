@@ -2,6 +2,7 @@ package com.rsargsyan.simplepowerfailuremonitor;
 
 import android.app.Application;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
@@ -29,5 +30,13 @@ public class MainApplication extends Application {
                         .showBadge(false)
                         .build();
         NotificationUtil.publishNotificationChannel(this, mainNotificationChannel);
+
+        NotificationChannel smsAlarmNotificationChannel =
+                new NotificationChannelBuilder(Constants.SMS_ALARM_NOTIFICATION_CHANNEL_ID,
+                        "SMS Alarm")
+                        .description("SMS alarm notifications")
+                        .importance(NotificationManager.IMPORTANCE_HIGH)
+                        .build();
+        NotificationUtil.publishNotificationChannel(this, smsAlarmNotificationChannel);
     }
 }
