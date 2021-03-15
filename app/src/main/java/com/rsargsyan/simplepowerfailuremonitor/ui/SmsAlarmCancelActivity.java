@@ -22,6 +22,11 @@ public class SmsAlarmCancelActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Intent intent = getIntent();
+        if (intent != null && Constants.ACTION_CANCEL_SMS_ALARM.equals(intent.getAction())) {
+            finish();
+        }
+
         setContentView(R.layout.activity_sms_alarm_cancel);
 
         makeActivityVisibleOnLockScreen();
