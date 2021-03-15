@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LifecycleService;
 
 import com.rsargsyan.simplepowerfailuremonitor.R;
-import com.rsargsyan.simplepowerfailuremonitor.ui.MainActivity;
+import com.rsargsyan.simplepowerfailuremonitor.ui.SmsAlarmCancelActivity;
 import com.rsargsyan.simplepowerfailuremonitor.utils.AlarmPlayer;
 
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ACTION_CANCEL_SMS_ALARM;
@@ -27,7 +27,7 @@ public class SMSReceivedAlarmService extends LifecycleService {
         PendingIntent cancelPendingIntent =
                 PendingIntent.getService(this, 0, cancelIntent, 0);
 
-        Intent fullScreenIntent = new Intent(this, MainActivity.class);
+        Intent fullScreenIntent = new Intent(this, SmsAlarmCancelActivity.class);
         PendingIntent fullScreenPendingIntent =
                 PendingIntent.getActivity(this, 0, fullScreenIntent, 0);
 
@@ -41,6 +41,7 @@ public class SMSReceivedAlarmService extends LifecycleService {
                         .addAction(R.drawable.ic_bolt_black_24dp, "CANCEL",
                                 cancelPendingIntent)
                         .setFullScreenIntent(fullScreenPendingIntent, true)
+                        .setContentIntent(fullScreenPendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setCategory(NotificationCompat.CATEGORY_ALARM)
                         .build();
@@ -54,6 +55,7 @@ public class SMSReceivedAlarmService extends LifecycleService {
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         if (intent != null && ACTION_CANCEL_SMS_ALARM.equals(intent.getAction())) {
+            stopFullScreenActivity();
             stopForeground(true);
             stopSelf();
         }
@@ -67,5 +69,11 @@ public class SMSReceivedAlarmService extends LifecycleService {
             alarmPlayer.stop();
         }
         super.onDestroy();
+    }
+
+    private void stopFullScreenActivity() {
+        Intent stopIntent = new Intent(this, SmsAlarmCancelActivity.class);
+        stopIntent.setAction(ACTION_CANCEL_SMS_ALARM);
+        startActivity(stopIntent);
     }
 }

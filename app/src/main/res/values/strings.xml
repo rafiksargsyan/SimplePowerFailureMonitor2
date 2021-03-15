@@ -45,4 +45,5 @@
     <string name="sms_alarm_settings">SMS alarm settings</string>
     <string name="alarming_message_title">Alarming SMS text</string>
     <string name="sms_alarm_title">Alarm when SMS received</string>
+    <string name="stop_sms_alarm">Stop SMS alarm</string>
 </resources>
