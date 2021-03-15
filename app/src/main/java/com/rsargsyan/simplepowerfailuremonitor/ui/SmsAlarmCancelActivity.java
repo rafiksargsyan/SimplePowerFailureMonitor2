@@ -35,8 +35,11 @@ public class SmsAlarmCancelActivity extends AppCompatActivity {
         registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                stopService(new Intent(SmsAlarmCancelActivity.this, SMSReceivedAlarmService.class));
-                finish();
+                if (intent != null && Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                    stopService(new Intent(SmsAlarmCancelActivity.this,
+                            SMSReceivedAlarmService.class));
+                    finish();
+                }
             }
         }, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
