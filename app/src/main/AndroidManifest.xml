@@ -19,7 +19,7 @@
         android:theme="@style/Theme.SimplePowerFailureMonitor.Bee">
         <activity
             android:name=".ui.SmsAlarmCancelActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar.FullScreen"
+            android:theme="@style/Theme.SimplePowerFailureMonitor.Bee.NoActionBar.FullScreen"
             android:launchMode="singleTop"
             android:excludeFromRecents="true" />
         <activity

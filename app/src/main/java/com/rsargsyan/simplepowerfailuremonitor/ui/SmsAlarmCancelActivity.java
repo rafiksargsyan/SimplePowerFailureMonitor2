@@ -7,9 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.rsargsyan.simplepowerfailuremonitor.R;
 import com.rsargsyan.simplepowerfailuremonitor.background.SMSReceivedAlarmService;
 import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
@@ -29,7 +29,7 @@ public class SmsAlarmCancelActivity extends AppCompatActivity {
 
         makeActivityVisibleOnLockScreen();
 
-        FloatingActionButton smsAlarmCancelFab = findViewById(R.id.cancel_sms_alarm_fab);
+        View smsAlarmCancelFab = findViewById(R.id.cancel_sms_alarm_fab);
         smsAlarmCancelFab.setOnClickListener(v -> {
             stopService(new Intent(this, SMSReceivedAlarmService.class));
             finish();
