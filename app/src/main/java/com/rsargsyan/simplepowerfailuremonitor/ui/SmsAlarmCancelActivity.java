@@ -3,10 +3,8 @@ package com.rsargsyan.simplepowerfailuremonitor.ui;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.KeyguardManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -36,17 +34,6 @@ public class SmsAlarmCancelActivity extends AppCompatActivity {
             stopService(new Intent(this, SMSReceivedAlarmService.class));
             finish();
         });
-
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent != null && Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                    stopService(new Intent(SmsAlarmCancelActivity.this,
-                            SMSReceivedAlarmService.class));
-                    finish();
-                }
-            }
-        }, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
 
     @Override
