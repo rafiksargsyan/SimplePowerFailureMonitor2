@@ -17,12 +17,17 @@
         android:singleLine="false"
         android:text="@string/alarming_sms_received"
         android:textSize="30sp"
-        app:layout_constraintBottom_toTopOf="@+id/cancel_sms_alarm_fab"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.52" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.7" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/cancel_sms_alarm_fab"
@@ -38,7 +43,6 @@
         app:icon="@drawable/ic_sharp_close_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sms_alarm_text" />
+        app:layout_constraintTop_toBottomOf="@+id/guideline" />
 </androidx.constraintlayout.widget.ConstraintLayout>
