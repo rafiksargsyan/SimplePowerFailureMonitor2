@@ -7,10 +7,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreferenceCompat;
@@ -34,6 +36,8 @@ import static com.rsargsyan.simplepowerfailuremonitor.utils.PreferenceUtil.setEd
 
 public class SettingsActivity extends AppCompatActivity {
     private static final char DOT = '\u2022';
+    private static final int SEND_SMS_PERMISSION_REQUEST_CODE = 7;
+    private static final int ALARM_SMS_PERMISSION_REQUEST_CODE = 13;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +80,57 @@ public class SettingsActivity extends AppCompatActivity {
             setupSenderEmailPassword();
 
             sendSmsPref = findPreference(SEND_SMS_KEY);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && sendSmsPref != null) {
+                sendSmsPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    Boolean boolValue = (Boolean) newValue;
+                    if (boolValue == null) return true;
+                    if (boolValue) {
+                        if (getContext().checkSelfPermission(Manifest.permission.SEND_SMS)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            return true;
+                        }
+                        requestPermissions(new String[] { Manifest.permission.SEND_SMS },
+                                SEND_SMS_PERMISSION_REQUEST_CODE);
+                        return false;
+                    }
+                    return true;
+                });
+            }
             smsAlarmPref = findPreference(SMS_ALARM_KEY);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && smsAlarmPref != null) {
+                smsAlarmPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    Boolean boolValue = (Boolean) newValue;
+                    if (boolValue == null) return true;
+                    if (boolValue) {
+                        if (getContext().checkSelfPermission(Manifest.permission.RECEIVE_SMS)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            return true;
+                        }
+                        requestPermissions(new String[] { Manifest.permission.RECEIVE_SMS },
+                                ALARM_SMS_PERMISSION_REQUEST_CODE);
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode,
+                                               @NonNull String[] permissions,
+                                               @NonNull int[] grantResults) {
+            if (requestCode == SEND_SMS_PERMISSION_REQUEST_CODE) {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    sendSmsPref.setChecked(true);
+                }
+            }
+            if (requestCode == ALARM_SMS_PERMISSION_REQUEST_CODE) {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    smsAlarmPref.setChecked(true);
+                }
+            }
         }
 
         // handling the scenario when permissions are revoked without our knowledge
