@@ -64,8 +64,7 @@ public class SettingsActivity extends AppCompatActivity {
                      editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 });
                 pref.setSummaryProvider(preference -> {
-                    final String password = getPreferenceManager().getSharedPreferences()
-                            .getString(preference.getKey(), "");
+                    final String password = pref.getText();
                     final int length = password.length();
                     if (0 == length) {
                         return preference.getContext().getString(R.string.not_set);
