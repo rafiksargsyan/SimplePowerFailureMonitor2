@@ -1,12 +1,19 @@
 package com.rsargsyan.simplepowerfailuremonitor.ui;
 
+import android.Manifest;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.rsargsyan.simplepowerfailuremonitor.R;
 
@@ -20,6 +27,8 @@ import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.PHONE_NUMB
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.RECIPIENT_EMAIL_ADDRESS_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SENDER_EMAIL_ADDRESS_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SENDER_EMAIL_PASSWORD_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SEND_SMS_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_ALARM_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMTP_PORT_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.PreferenceUtil.setEditTextPreferenceInputType;
 
@@ -43,6 +52,17 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
+        private SwitchPreferenceCompat sendSmsPref;
+        private SwitchPreferenceCompat smsAlarmPref;
+        private SharedPreferences sharedPreferences;
+
+        @Override
+        public void onCreate(@Nullable Bundle savedInstanceState) {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+            syncPermissions();
+            super.onCreate(savedInstanceState);
+        }
+
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
@@ -54,6 +74,26 @@ public class SettingsActivity extends AppCompatActivity {
             setEditTextPreferenceInputType(findPreference(SENDER_EMAIL_ADDRESS_KEY),
                     TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             setupSenderEmailPassword();
+
+            sendSmsPref = findPreference(SEND_SMS_KEY);
+            smsAlarmPref = findPreference(SMS_ALARM_KEY);
+        }
+
+        // handling the scenario when permissions are revoked without our knowledge
+        private void syncPermissions() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (getContext().checkSelfPermission(Manifest.permission.SEND_SMS)
+                        == PackageManager.PERMISSION_DENIED) {
+                    sharedPreferences.edit().putBoolean(SEND_SMS_KEY, false).apply();
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (getContext().checkSelfPermission(Manifest.permission.RECEIVE_SMS)
+                        == PackageManager.PERMISSION_DENIED) {
+                    sharedPreferences.edit().putBoolean(SMS_ALARM_KEY, false).apply();
+                }
+            }
         }
 
         private void setupSenderEmailPassword() {
