@@ -12,8 +12,8 @@
     <string name="sms_settings">SMS կարգավորումներ</string>
     <string name="power_is_off">Էլեկտրաէներգիան անջատված է</string>
     <string name="power_is_on">Էլեկտրաէներգիան միացված է</string>
-    <string name="power_off_msg_title">Հաղորդագրություն էլեկտրաէներգիայի անջատման դեքպում</string>
-    <string name="power_on_msg_title">Հաղորդագրություն էլեկտրաէներգիայի միացման դեքպում</string>
+    <string name="power_off_msg_title">Հաղորդագրություն էլեկտրաէներգիայի անջատման դեպքում</string>
+    <string name="power_on_msg_title">Հաղորդագրություն էլեկտրաէներգիայի միացման դեպքում</string>
     <string name="send_sms_title">Ուղարկել SMS</string>
     <string name="disabled">Անջատված է</string>
     <string name="enabled">Միացված է</string>
