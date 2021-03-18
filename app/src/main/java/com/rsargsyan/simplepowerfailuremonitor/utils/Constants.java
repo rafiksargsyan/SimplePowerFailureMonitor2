@@ -35,7 +35,6 @@ public class Constants {
     public static final String DEFAULT_SMTP_USERNAME = "simplepowerfailuremonitor@gmail.com";
     public static final String DEFAULT_SMTP_PASSWORD = "~/&LX)@5w9KS^2#>";
     public static final String DEFAULT_SMTP_PORT = "465";
-    public static final String DEFAULT_EMAIL_SUBJECT = "Power state changed";
 
     // SMS alarm settings
     public static final String SMS_ALARM_KEY = "sms_alarm";

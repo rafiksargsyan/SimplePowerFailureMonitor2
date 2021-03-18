@@ -37,7 +37,6 @@ import co.nedim.maildroidx.MaildroidX;
 import co.nedim.maildroidx.MaildroidXType;
 
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_SMART_MUTE_KEY;
-import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_EMAIL_SUBJECT;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PASSWORD;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PORT;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_SERVER;
@@ -319,7 +318,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
                 .type(MaildroidXType.PLAIN)
                 .to(to)
                 .from(fromFinal)
-                .subject(DEFAULT_EMAIL_SUBJECT)
+                .subject(getString(R.string.app_name))
                 .body(body)
                 .mail());
     }
