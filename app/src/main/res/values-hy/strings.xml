@@ -5,4 +5,27 @@
     <string name="settings">Կարգավորումներ</string>
     <string name="title_activity_settings">Կարգավորումներ</string>
     <string name="alarm_settings_title">Ձայնային ահազանգի կարգավորումներ</string>
+    <string name="play_alarm_sound_title">Հնչեցնել ձայնային ահազանգ</string>
+    <string name="play_alarm_sound_summary">Հնչեցնել ձայնային ահազանգ, երբ հոսանքի խափանում է տեղի ունենում</string>
+    <string name="alarm_sound_smart_muting_title">Ձայնային ազդանշանի խելացի անջատում</string>
+    <string name="alarm_smart_muting_summary">Ավտոմատ անջատել ձայնային ազդանշանը երբ մարդու միջամտություն է նկատվում</string>
+    <string name="sms_settings">SMS կարգավորումներ</string>
+    <string name="power_is_off">Էլեկտրաէներգիան անջատված է</string>
+    <string name="power_is_on">Էլեկտրաէներգիան միացված է</string>
+    <string name="power_off_msg_title">Հաղորդագրություն էլեկտրաէներգիայի անջատման դեքպում</string>
+    <string name="power_on_msg_title">Հաղորդագրություն էլեկտրաէներգիայի միացման դեքպում</string>
+    <string name="send_sms_title">Ուղարկել SMS</string>
+    <string name="disabled">Անջատված է</string>
+    <string name="enabled">Միացված է</string>
+    <string name="recipient_phone_number">Ստացողի հեռախոսահամարը</string>
+    <string name="email_settings">Էլ. Փոստի կարգավորումներ</string>
+    <string name="send_email_title">ուղարկել էլ-նամակ</string>
+    <string name="recipient_email_address_title">Ստացողի էլ. Փոստի հասցեն</string>
+    <string name="power_off_email_body_title">Հաղորդագրություն էլեկտրաէներգիայի անջատման դեքպում</string>
+    <string name="power_on_email_body">Հաղորդագրություն էլեկտրաէներգիայի միացման դեքպում</string>
+    <string name="smtp_server_title">SMTP սերվեր</string>
+    <string name="sender_email_address_title">Ուղարկողի էլ. Փոստի հասցեն</string>
+    <string name="sender_email_password_title">Ուղարկողի էլ.փոստի գաղտնաբառը</string>
+    <string name="email_use_default_summary_off">Օգտատիրոջ կողմից նշված կարգավորումները կօգտագործվեն էլփոստով հաղորդագրություններ ուղարկելու համար</string>
+    <string name="email_use_default_summary_on">simplepowerfailuremonitor@gmail.com- ը կօգտագործվի էլփոստով հաղորդագրություններ ուղարկելու համար</string>
 </resources>

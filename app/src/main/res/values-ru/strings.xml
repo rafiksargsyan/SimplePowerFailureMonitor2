@@ -5,4 +5,27 @@
     <string name="settings">Настройки</string>
     <string name="title_activity_settings">Настройки</string>
     <string name="alarm_settings_title">Настройки звуковой сигнализации</string>
+    <string name="play_alarm_sound_title">Воспроизвести сигнал тревоги</string>
+    <string name="play_alarm_sound_summary">Воспроизвести сигнал тревоги когда питание отключается</string>
+    <string name="alarm_sound_smart_muting_title">Умное отключение звука сигнала тревоги</string>
+    <string name="alarm_smart_muting_summary">Автоматически отключать звук сигнала тревоги при обнаружении человеческого взаимодействия</string>
+    <string name="sms_settings">Настройки SMS</string>
+    <string name="power_is_off">Питание отключено</string>
+    <string name="power_is_on">Питание включено</string>
+    <string name="power_off_msg_title">Сообщение об отключении питания</string>
+    <string name="power_on_msg_title">Сообщение о включении питания</string>
+    <string name="send_sms_title">Отправить смс</string>
+    <string name="disabled">Отключено</string>
+    <string name="enabled">Включено</string>
+    <string name="recipient_phone_number">Номер телефона получателя</string>
+    <string name="email_settings">Настройки электронной почты</string>
+    <string name="send_email_title">Отправить электронное письмо</string>
+    <string name="recipient_email_address_title">Адрес электронной почты получателя</string>
+    <string name="power_off_email_body_title">Сообщение об отключении питания</string>
+    <string name="power_on_email_body">Сообщение о включении питания</string>
+    <string name="smtp_server_title">SMTP сервер</string>
+    <string name="sender_email_address_title">Адрес электронной почты отправителя</string>
+    <string name="sender_email_password_title">Пароль электронной почты отправителя</string>
+    <string name="email_use_default_summary_off">Пользовательские настройки будут использоваться для отправки сообщений электронной почты.</string>
+    <string name="email_use_default_summary_on">simplepowerfailuremonitor@gmail.com будет использоваться для отправки сообщений электронной почты</string>
 </resources>
