@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">էլեկտրաէներգիայի խափանումների մոնիտորինգ</string>
+    <string name="start_stop_monitoring">Սկսել / դադարեցնել մոնիտորինգը</string>
+    <string name="settings">Կարգավորումներ</string>
+    <string name="title_activity_settings">Կարգավորումներ</string>
+    <string name="alarm_settings_title">Ձայնային ահազանգի կարգավորումներ</string>
+</resources>

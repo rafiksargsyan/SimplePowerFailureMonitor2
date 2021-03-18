@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Монитор сбоя питания</string>
+    <string name="start_stop_monitoring">Запуск / остановка мониторинга</string>
+    <string name="settings">Настройки</string>
+    <string name="title_activity_settings">Настройки</string>
+    <string name="alarm_settings_title">Настройки звуковой сигнализации</string>
+</resources>
