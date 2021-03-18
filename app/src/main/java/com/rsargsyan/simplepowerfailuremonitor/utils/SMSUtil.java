@@ -31,8 +31,7 @@ public class SMSUtil {
         if (powerOnMsg == null) {
             powerOnMsg = context.getResources().getString(R.string.power_is_on);
         }
-        String result = (isPlugged ? powerOnMsg : powerOffMsg);
-        return result;
+        return (isPlugged ? powerOnMsg : powerOffMsg);
     }
 
     public static SmsMessage[]  getSmsMessagesFromIntent(Intent intent) {
