@@ -224,7 +224,8 @@ public class PowerFailureMonitoringService extends LifecycleService {
             drawable = ContextCompat.getDrawable(this, largeIconInt);
             bitmap = DrawableUtil.drawableToBitmap(drawable);
             contentTitle =
-                    (phoneIsPlugged ? "The phone is plugged" : "The phone is not plugged");
+                    (phoneIsPlugged ? getString(R.string.the_phone_is_plugged)
+                            : getString(R.string.the_phone_is_not_plugged));
         }
         return createNotification(contentTitle, bitmap, createMainActivityIntent());
     }
@@ -245,7 +246,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
         return new NotificationCompat.Builder(this, MAIN_NOTIFICATION_CHANNEL_ID)
                 .setOngoing(true)
                 .setContentTitle(contentTitle)
-                .setContentText("Click to manage")
+                .setContentText(getString(R.string.click_to_manage))
                 .setContentIntent(intent)
                 .setSmallIcon(R.drawable.ic_bolt_black_24dp)
                 .setLargeIcon(largeIcon)

@@ -3,12 +3,10 @@ package com.rsargsyan.simplepowerfailuremonitor.ui;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -55,14 +53,16 @@ public class MainActivity extends AppCompatActivity {
                 if (!isServiceRunning(this, PowerFailureMonitoringService.class)) {
                     startMonitoringService();
                     Toast.makeText(this,
-                            "Monitoring has been started!", Toast.LENGTH_SHORT).show();
+                            getString(R.string.monitoring_has_been_started),
+                            Toast.LENGTH_SHORT).show();
                 }
             } else {
                 if (isServiceRunning(this, PowerFailureMonitoringService.class)) {
                     stopService(new Intent(this,
                             PowerFailureMonitoringService.class));
                     Toast.makeText(this,
-                            "Monitoring has been stopped!", Toast.LENGTH_SHORT).show();
+                            getString(R.string.monitoring_has_been_stopped),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -59,4 +59,15 @@ public class SMSUtil {
         }
         return false;
     }
+
+    public static String getContainingSms(@NonNull Intent intent,
+                                           @NonNull String text) {
+        for (SmsMessage sms : getSmsMessagesFromIntent(intent)) {
+            final String msg = sms.getMessageBody();
+            if (msg != null && msg.contains(text)) {
+                return msg;
+            }
+        }
+        return null;
+    }
 }

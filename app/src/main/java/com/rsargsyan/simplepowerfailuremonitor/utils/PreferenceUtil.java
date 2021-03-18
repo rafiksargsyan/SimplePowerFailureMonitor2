@@ -1,8 +1,5 @@
 package com.rsargsyan.simplepowerfailuremonitor.utils;
 
-import android.text.InputType;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.EditTextPreference;
 

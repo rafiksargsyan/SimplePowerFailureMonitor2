@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.LifecycleService;
 
 import com.rsargsyan.simplepowerfailuremonitor.R;
@@ -15,13 +16,21 @@ import com.rsargsyan.simplepowerfailuremonitor.utils.AlarmPlayer;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ACTION_CANCEL_SMS_ALARM;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_ALARM_NOTIFICATION_CHANNEL_ID;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_ALARM_NOTIFICATION_ID;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_MSG_EXTRA_KEY;
 
 public class SMSReceivedAlarmService extends LifecycleService {
     private AlarmPlayer alarmPlayer;
+    private boolean firstTime = true;
 
     @Override
-    public void onCreate() {
-        super.onCreate();
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_CANCEL_SMS_ALARM.equals(intent.getAction())) {
+            stopFullScreenActivity();
+            stopForeground(true);
+            stopSelf();
+            return super.onStartCommand(intent, flags, startId);
+        }
+
         Intent cancelIntent = new Intent(this, SMSReceivedAlarmService.class);
         cancelIntent.setAction(ACTION_CANCEL_SMS_ALARM);
         PendingIntent cancelPendingIntent =
@@ -31,34 +40,33 @@ public class SMSReceivedAlarmService extends LifecycleService {
         PendingIntent fullScreenPendingIntent =
                 PendingIntent.getActivity(this, 0, fullScreenIntent, 0);
 
+        final String smsMsg = (intent != null ? intent.getStringExtra(SMS_MSG_EXTRA_KEY) : "");
         Notification smsAlarmNotification =
                 new NotificationCompat.Builder(this, SMS_ALARM_NOTIFICATION_CHANNEL_ID)
                         .setOngoing(true)
-                        .setContentTitle("TestTitle")
-                        .setContentText("TestText")
+                        .setContentTitle(getString(R.string.alarming_sms_received_notif))
+                        .setContentText(smsMsg)
                         .setSilent(true)
                         .setSmallIcon(R.drawable.ic_bolt_black_24dp)
-                        .addAction(R.drawable.ic_bolt_black_24dp, "CANCEL",
+                        .addAction(R.drawable.ic_sharp_close_24,
+                                getString(android.R.string.cancel),
                                 cancelPendingIntent)
                         .setFullScreenIntent(fullScreenPendingIntent, true)
                         .setContentIntent(fullScreenPendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setCategory(NotificationCompat.CATEGORY_ALARM)
                         .build();
+        if (firstTime) {
+            startForeground(SMS_ALARM_NOTIFICATION_ID, smsAlarmNotification);
+            firstTime = false;
+        } else {
+            NotificationManagerCompat.from(this)
+                    .notify(SMS_ALARM_NOTIFICATION_ID, smsAlarmNotification);
+        }
 
-        startForeground(SMS_ALARM_NOTIFICATION_ID, smsAlarmNotification);
-
+        if (alarmPlayer != null) alarmPlayer.stop();
         alarmPlayer = new AlarmPlayer(this);
         alarmPlayer.play();
-    }
-
-    @Override
-    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_CANCEL_SMS_ALARM.equals(intent.getAction())) {
-            stopFullScreenActivity();
-            stopForeground(true);
-            stopSelf();
-        }
 
         return super.onStartCommand(intent, flags, startId);
     }

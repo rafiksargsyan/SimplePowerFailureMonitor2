@@ -16,6 +16,7 @@ import com.rsargsyan.simplepowerfailuremonitor.viewmodel.SharedPreferenceLiveDat
 
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARMING_MESSAGE_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_ALARM_KEY;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_MSG_EXTRA_KEY;
 
 public class SMSBroadcastReceiver extends BroadcastReceiver {
     private LiveData<Boolean> shouldAlarm;
@@ -30,7 +31,8 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
                 final String alarmingSmsMsgValue = alarmingSmsMsg.getValue();
                 if (alarmingSmsMsgValue != null &&
                         SMSUtil.smsContainsText(intent, alarmingSmsMsgValue)) {
-                    startSMSAlarmService(context);
+                    startSMSAlarmService(context, SMSUtil.getContainingSms(intent,
+                            alarmingSmsMsgValue));
                 }
             }
         }
@@ -49,11 +51,13 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private void startSMSAlarmService(Context context) {
+    private void startSMSAlarmService(Context context, String smsMsg) {
+        Intent intent = new Intent(context, SMSReceivedAlarmService.class);
+        intent.putExtra(SMS_MSG_EXTRA_KEY, smsMsg);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(new Intent(context, SMSReceivedAlarmService.class));
+            context.startForegroundService(intent);
         } else {
-            context.startService(new Intent(context, SMSReceivedAlarmService.class));
+            context.startService(intent);
         }
     }
 }

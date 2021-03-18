@@ -23,7 +23,8 @@
             app:key="send_sms"
             app:title="@string/send_sms_title"
             app:summaryOff="@string/disabled"
-            app:summaryOn="@string/enabled" />
+            app:summaryOn="@string/enabled"
+            app:defaultValue="false" />
 
         <EditTextPreference
             app:key="phone_number"
@@ -78,7 +79,7 @@
 
         <SwitchPreferenceCompat
             app:key="email_use_default"
-            app:title="Use default email sender"
+            app:title="@string/use_default_email_sender"
             app:summaryOn="@string/email_use_default_summary_on"
             app:summaryOff="@string/email_use_default_summary_off"
             app:disableDependentsState="true"
@@ -102,15 +103,13 @@
             app:key="email_address"
             app:title="@string/sender_email_address_title"
             app:useSimpleSummaryProvider="true"
-            app:dependency="email_use_default"
-            app:defaultValue="" />
+            app:dependency="email_use_default" />
 
         <EditTextPreference
             app:key="email_password"
             app:title="@string/sender_email_password_title"
             app:useSimpleSummaryProvider="true"
-            app:dependency="email_use_default"
-            app:defaultValue="" />
+            app:dependency="email_use_default" />
 
     </PreferenceCategory>
 

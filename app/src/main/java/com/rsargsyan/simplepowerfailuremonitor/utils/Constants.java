@@ -45,4 +45,5 @@ public class Constants {
             "com.rsargsyan.simplepowerfailuremonitor.ACTION_CANCEL_SMS_ALARM";
     public static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
 
+    public static final String SMS_MSG_EXTRA_KEY = "SMS_MSG_EXTRA";
 }
