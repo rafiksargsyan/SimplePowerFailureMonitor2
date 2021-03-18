@@ -28,4 +28,16 @@
     <string name="sender_email_password_title">Ուղարկողի էլ.փոստի գաղտնաբառը</string>
     <string name="email_use_default_summary_off">Օգտատիրոջ կողմից նշված կարգավորումները կօգտագործվեն էլփոստով հաղորդագրություններ ուղարկելու համար</string>
     <string name="email_use_default_summary_on">simplepowerfailuremonitor@gmail.com- ը կօգտագործվի էլփոստով հաղորդագրություններ ուղարկելու համար</string>
+    <string name="sms_alarm_settings">SMS ահազանգի կարգավորումներ</string>
+    <string name="alarming_message_title">Տագնապի SMS տեքստ</string>
+    <string name="sms_alarm_title">Ահազանգել, երբ SMS է ստացվում</string>
+    <string name="stop_sms_alarm">Դադարեցնել SMS ահազանգը</string>
+    <string name="alarming_sms_received">ՏԱԳՆԱՊԻ SMS Է\nՍՏԱՑՎԵԼ</string>
+    <string name="monitoring_has_been_started">Մոնիտորինգը սկսված է</string>
+    <string name="monitoring_has_been_stopped">Մոնիտորինգը դադարեցված է</string>
+    <string name="the_phone_is_plugged">Հեռախոսը միացված է</string>
+    <string name="the_phone_is_not_plugged">Հեռախոսը անջատված է</string>
+    <string name="click_to_manage">Սեղմեք՝ ղեկավարելու համար</string>
+    <string name="use_default_email_sender">Օգտագործել էլփոստի լռելյայն ուղարկողին</string>
+    <string name="alarming_sms_received_notif">Ստացվել է տագնապալի SMS</string>
 </resources>

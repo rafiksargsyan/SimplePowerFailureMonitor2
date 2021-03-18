@@ -14,7 +14,7 @@
     <string name="power_is_on">Питание включено</string>
     <string name="power_off_msg_title">Сообщение об отключении питания</string>
     <string name="power_on_msg_title">Сообщение о включении питания</string>
-    <string name="send_sms_title">Отправить смс</string>
+    <string name="send_sms_title">Отправить SMS</string>
     <string name="disabled">Отключено</string>
     <string name="enabled">Включено</string>
     <string name="recipient_phone_number">Номер телефона получателя</string>
@@ -28,4 +28,16 @@
     <string name="sender_email_password_title">Пароль электронной почты отправителя</string>
     <string name="email_use_default_summary_off">Пользовательские настройки будут использоваться для отправки сообщений электронной почты.</string>
     <string name="email_use_default_summary_on">simplepowerfailuremonitor@gmail.com будет использоваться для отправки сообщений электронной почты</string>
+    <string name="sms_alarm_settings">Настройки SMS тревоги</string>
+    <string name="alarming_message_title">Тревожный текст SMS</string>
+    <string name="sms_alarm_title">Тревога при получении СМС</string>
+    <string name="stop_sms_alarm">Остановить SMS-оповещение</string>
+    <string name="alarming_sms_received">SMS ТРЕВОГИ\nПОЛУЧЕНО</string>
+    <string name="monitoring_has_been_started">Мониторинг запущен!</string>
+    <string name="monitoring_has_been_stopped">Мониторинг остановлен!</string>
+    <string name="the_phone_is_plugged">Телефон подключен</string>
+    <string name="the_phone_is_not_plugged">Телефон не подключен</string>
+    <string name="click_to_manage">Нажмите, чтобы управлять</string>
+    <string name="use_default_email_sender">Использовать отправителя электронной почты по умолчанию</string>
+    <string name="alarming_sms_received_notif">Получено SMS тревоги</string>
 </resources>
