@@ -21,8 +21,8 @@
     <string name="email_settings">Էլ. Փոստի կարգավորումներ</string>
     <string name="send_email_title">ուղարկել էլ-նամակ</string>
     <string name="recipient_email_address_title">Ստացողի էլ. Փոստի հասցեն</string>
-    <string name="power_off_email_body_title">Հաղորդագրություն էլեկտրաէներգիայի անջատման դեքպում</string>
-    <string name="power_on_email_body">Հաղորդագրություն էլեկտրաէներգիայի միացման դեքպում</string>
+    <string name="power_off_email_body_title">Հաղորդագրություն էլեկտրաէներգիայի անջատման դեպքում</string>
+    <string name="power_on_email_body">Հաղորդագրություն էլեկտրաէներգիայի միացման դեպքում</string>
     <string name="smtp_server_title">SMTP սերվեր</string>
     <string name="sender_email_address_title">Ուղարկողի էլ. Փոստի հասցեն</string>
     <string name="sender_email_password_title">Ուղարկողի էլ.փոստի գաղտնաբառը</string>
@@ -39,5 +39,5 @@
     <string name="the_phone_is_not_plugged">Հեռախոսը անջատված է</string>
     <string name="click_to_manage">Սեղմեք՝ ղեկավարելու համար</string>
     <string name="use_default_email_sender">Օգտագործել էլփոստի լռելյայն ուղարկողին</string>
-    <string name="alarming_sms_received_notif">Ստացվել է տագնապալի SMS</string>
+    <string name="alarming_sms_received_notif">Ստացվել է տագնապի SMS</string>
 </resources>
