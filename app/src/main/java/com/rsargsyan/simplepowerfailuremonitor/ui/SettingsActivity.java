@@ -158,7 +158,7 @@ public class SettingsActivity extends AppCompatActivity {
                 });
                 pref.setSummaryProvider(preference -> {
                     final String password = pref.getText();
-                    final int length = password.length();
+                    final int length = (password == null ? 0 : password.length());
                     if (0 == length) {
                         return preference.getContext().getString(R.string.not_set);
                     }
