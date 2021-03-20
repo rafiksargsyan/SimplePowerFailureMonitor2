@@ -40,4 +40,5 @@
     <string name="click_to_manage">Click to manage</string>
     <string name="use_default_email_sender">Use default email sender</string>
     <string name="alarming_sms_received_notif">Alarming SMS received</string>
+    <string name="alarm_sound_title">Alarm sound</string>
 </resources>

@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.IBinder;
 
@@ -20,6 +21,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleService;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.preference.PreferenceManager;
 
 import com.rsargsyan.simplepowerfailuremonitor.utils.AlarmPlayer;
@@ -36,6 +38,7 @@ import java.util.concurrent.Executors;
 import co.nedim.maildroidx.MaildroidX;
 import co.nedim.maildroidx.MaildroidXType;
 
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_SMART_MUTE_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PASSWORD;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PORT;
@@ -64,6 +67,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private final ExecutorService smsSenderExecutor = Executors.newSingleThreadExecutor();
 
     private LiveData<Boolean> playAlarm;
+    private LiveData<String> alarmSound;
     private LiveData<Boolean> sendSMS;
     private LiveData<String> phoneNumber;
     private LiveData<String> powerOffMsg;
@@ -173,6 +177,10 @@ public class PowerFailureMonitoringService extends LifecycleService {
         powerOnBody = new SharedPreferenceLiveData<>(String.class,
                 sharedPreferences, POWER_ON_BODY_KEY);
         powerOnBody.observe(this, it -> { /*NOOP*/ });
+
+        alarmSound = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, ALARM_SOUND_KEY);
+        alarmSound.observe(this, s -> { });
     }
 
     @Override
@@ -261,11 +269,19 @@ public class PowerFailureMonitoringService extends LifecycleService {
 
         if (shouldPlayAlarm(isPlugged)) {
             if (alarmPlayer == null) {
-                alarmPlayer = new AlarmPlayer(this);
+                final String alarmSoundValue = alarmSound.getValue();
+                if (alarmSoundValue == null) {
+                    alarmPlayer = new AlarmPlayer(this);
+                } else {
+                    alarmPlayer = new AlarmPlayer(this, Uri.parse(alarmSoundValue));
+                }
             }
             alarmPlayer.play();
-        } else if (alarmPlayer != null){
-            alarmPlayer.stop();
+        } else if (isPlugged) {
+            if (alarmPlayer != null) {
+                alarmPlayer.stop();
+                alarmPlayer = null;
+            }
         }
 
         if (shouldSendSMS(isPlugged)) {

@@ -3,6 +3,8 @@ package com.rsargsyan.simplepowerfailuremonitor.ui;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
@@ -12,13 +14,22 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
+import androidx.preference.ListPreference;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.rsargsyan.simplepowerfailuremonitor.R;
+import com.rsargsyan.simplepowerfailuremonitor.utils.Constants;
 
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static android.text.InputType.TYPE_CLASS_PHONE;
 import static android.text.InputType.TYPE_CLASS_TEXT;
@@ -69,6 +80,7 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+            addAlarmSoundPreference();
 
             setEditTextPreferenceInputType(findPreference(PHONE_NUMBER_KEY), TYPE_CLASS_PHONE);
             setEditTextPreferenceInputType(findPreference(RECIPIENT_EMAIL_ADDRESS_KEY),
@@ -112,6 +124,45 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 });
             }
+        }
+
+        private void addAlarmSoundPreference() {
+            ListPreference alarmSoundPref = new ListPreference(this.requireContext());
+            alarmSoundPref.setKey(Constants.ALARM_SOUND_KEY);
+            alarmSoundPref.setTitle(R.string.alarm_sound_title);
+            alarmSoundPref.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
+
+            Map<String, String> notifications = getNotifications();
+            final String[] alarmNames = notifications.keySet().toArray(new String[0]);
+            // Arrays.sort(alarmNames);
+
+            alarmSoundPref.setEntries(alarmNames);
+            alarmSoundPref.setEntryValues(notifications.values().toArray(new String[0]));
+
+            PreferenceCategory alarmSettingsPrefCategory =
+                    findPreference(Constants.ALARM_SETTINGS_KEY);
+            alarmSettingsPrefCategory.addPreference(alarmSoundPref);
+
+            // It is important to set dependency after adding the preference to preference
+            // category, otherwise an exception is thrown
+            alarmSoundPref.setDependency(Constants.PLAY_ALARM_SOUND_KEY);
+        }
+
+        public Map<String, String> getNotifications() {
+            RingtoneManager manager = new RingtoneManager(this.requireContext());
+            manager.setType(RingtoneManager.TYPE_ALARM);
+            Cursor cursor = manager.getCursor();
+
+            Map<String, String> list = new HashMap<>();
+            while (cursor.moveToNext()) {
+                String notificationTitle = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+                String notificationUri = cursor.getString(RingtoneManager.URI_COLUMN_INDEX) + "/"
+                        + cursor.getString(RingtoneManager.ID_COLUMN_INDEX);
+
+                list.put(notificationTitle, notificationUri);
+            }
+
+            return list;
         }
 
         @Override

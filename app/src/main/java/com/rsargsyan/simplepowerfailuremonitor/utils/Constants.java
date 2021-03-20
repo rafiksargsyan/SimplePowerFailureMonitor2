@@ -12,6 +12,8 @@ public class Constants {
     // Alarm preferences
     public static final String PLAY_ALARM_SOUND_KEY = "play_alarm_sound";
     public static final String ALARM_SOUND_SMART_MUTE_KEY = "smart_cancel";
+    public static final String ALARM_SOUND_KEY = "alarm_sound";
+    public static final String ALARM_SETTINGS_KEY = "alarm_settings";
 
     // SMS preferences
     public static final String SEND_SMS_KEY = "send_sms";

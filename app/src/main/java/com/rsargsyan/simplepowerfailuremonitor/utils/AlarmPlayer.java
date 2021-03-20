@@ -3,6 +3,7 @@ package com.rsargsyan.simplepowerfailuremonitor.utils;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.provider.Settings;
 
 import java.io.IOException;
@@ -10,9 +11,15 @@ import java.io.IOException;
 public class AlarmPlayer {
     private final Context context;
     private MediaPlayer mp;
+    final private Uri alarmSound;
 
     public AlarmPlayer(Context context) {
+        this(context, Settings.System.DEFAULT_ALARM_ALERT_URI);
+    }
+
+    public AlarmPlayer(Context context, Uri alarmSound) {
         this.context = context;
+        this.alarmSound = alarmSound;
     }
 
     public void play() {
@@ -39,14 +46,14 @@ public class AlarmPlayer {
     }
 
     private void initMediaPlayer2() {
-        mp = MediaPlayer.create(context, Settings.System.DEFAULT_ALARM_ALERT_URI);
+        mp = MediaPlayer.create(context, alarmSound);
         mp.setLooping(true);
     }
 
     private void initMediaPlayer1() throws IOException {
         mp = new MediaPlayer();
         mp.setLooping(true);
-        mp.setDataSource(context, Settings.System.DEFAULT_ALARM_ALERT_URI);
+        mp.setDataSource(context, alarmSound);
         mp.setAudioStreamType(AudioManager.STREAM_ALARM);
         mp.prepare();
     }
