@@ -62,7 +62,6 @@ public class PowerFailureMonitoringService extends LifecycleService {
     private static final int DUMMY_REQUEST_CODE = 0;
 
     private final ExecutorService smsSenderExecutor = Executors.newSingleThreadExecutor();
-    private final ExecutorService emailSenderExecutor = Executors.newSingleThreadExecutor();
 
     private LiveData<Boolean> playAlarm;
     private LiveData<Boolean> sendSMS;
@@ -196,7 +195,6 @@ public class PowerFailureMonitoringService extends LifecycleService {
         destroyAlarmPlayer();
         humanInteractionDetector.unregister();
         smsSenderExecutor.shutdown();
-        emailSenderExecutor.shutdown();
     }
 
     private void destroyAlarmPlayer() {
@@ -273,16 +271,16 @@ public class PowerFailureMonitoringService extends LifecycleService {
         if (shouldSendSMS(isPlugged)) {
             final String phoneNumberValue = phoneNumber.getValue();
             final String msg =
-                    SMSUtil.getSMSMsg(this, isPlugged,
-                            powerOffMsg.getValue(), powerOnMsg.getValue());
+                    SMSUtil.getSMSMsg(isPlugged, powerOffMsg.getValue(), powerOnMsg.getValue());
             smsSenderExecutor.submit(() -> SMSUtil.sendSMS(phoneNumberValue, msg));
         }
 
         if (shouldSendEmail(isPlugged)) {
-            final String emailBody =
-                    SMSUtil.getSMSMsg(this, isPlugged,
-                            powerOffBody.getValue(), powerOnBody.getValue());
-            sendEmail(emailBody);
+            String emailBody =
+                    SMSUtil.getSMSMsg(isPlugged, powerOffBody.getValue(), powerOnBody.getValue());
+            if (emailBody != null && !emailBody.isEmpty()) {
+                sendEmail(emailBody);
+            }
         }
 
         phoneIsPlugged = isPlugged;
@@ -310,7 +308,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
         final String fromFinal = from;
         final String portFinal = port;
 
-        emailSenderExecutor.submit(() -> new MaildroidX.Builder()
+        new MaildroidX.Builder()
                 .smtp(smtpServerFinal)
                 .smtpUsername(smtpUsernameFinal)
                 .smtpPassword(smtpPasswordFinal)
@@ -320,7 +318,7 @@ public class PowerFailureMonitoringService extends LifecycleService {
                 .from(fromFinal)
                 .subject(getString(R.string.app_name))
                 .body(body)
-                .mail());
+                .mail();
     }
 
     private boolean shouldUseDefaultEmail() {

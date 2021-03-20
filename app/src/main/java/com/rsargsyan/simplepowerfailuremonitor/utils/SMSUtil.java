@@ -23,14 +23,7 @@ public class SMSUtil {
         }
     }
 
-    public static String getSMSMsg(@NonNull Context context, boolean isPlugged,
-                                   String powerOffMsg, String powerOnMsg) {
-        if (powerOffMsg == null) {
-            powerOffMsg = context.getResources().getString(R.string.power_is_off);
-        }
-        if (powerOnMsg == null) {
-            powerOnMsg = context.getResources().getString(R.string.power_is_on);
-        }
+    public static String getSMSMsg(boolean isPlugged, String powerOffMsg, String powerOnMsg) {
         return (isPlugged ? powerOnMsg : powerOffMsg);
     }
 
