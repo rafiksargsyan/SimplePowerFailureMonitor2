@@ -1,14 +1,11 @@
 package com.rsargsyan.simplepowerfailuremonitor.utils;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 
 import androidx.annotation.NonNull;
-
-import com.rsargsyan.simplepowerfailuremonitor.R;
 
 public class SMSUtil {
 
