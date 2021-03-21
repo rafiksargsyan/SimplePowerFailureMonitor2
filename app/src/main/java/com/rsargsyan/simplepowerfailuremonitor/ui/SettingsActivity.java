@@ -148,9 +148,6 @@ public class SettingsActivity extends AppCompatActivity {
 
             alarmSoundPref.setSummary(RingtoneManager.getRingtone(getContext(),
                     Uri.parse(alarmSoundPref.getText())).getTitle(getContext()));
-            // It is important to set dependency after adding the preference to preference
-            // category, otherwise an exception is thrown
-            alarmSoundPref.setDependency(Constants.PLAY_ALARM_SOUND_KEY);
         }
 
         @Override
@@ -222,19 +219,6 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         private class RingtonePickerPreference extends EditTextPreference {
-            public RingtonePickerPreference(Context context, AttributeSet attrs,
-                                            int defStyleAttr, int defStyleRes) {
-                super(context, attrs, defStyleAttr, defStyleRes);
-            }
-
-            public RingtonePickerPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-                super(context, attrs, defStyleAttr);
-            }
-
-            public RingtonePickerPreference(Context context, AttributeSet attrs) {
-                super(context, attrs);
-            }
-
             public RingtonePickerPreference(Context context) {
                 super(context);
             }

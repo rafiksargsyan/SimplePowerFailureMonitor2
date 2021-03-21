@@ -3,17 +3,23 @@ package com.rsargsyan.simplepowerfailuremonitor.background;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.LifecycleService;
+import androidx.lifecycle.LiveData;
+import androidx.preference.PreferenceManager;
 
 import com.rsargsyan.simplepowerfailuremonitor.R;
 import com.rsargsyan.simplepowerfailuremonitor.ui.SmsAlarmCancelActivity;
 import com.rsargsyan.simplepowerfailuremonitor.utils.AlarmPlayer;
+import com.rsargsyan.simplepowerfailuremonitor.viewmodel.SharedPreferenceLiveData;
 
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ACTION_CANCEL_SMS_ALARM;
+import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_ALARM_NOTIFICATION_CHANNEL_ID;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_ALARM_NOTIFICATION_ID;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_MSG_EXTRA_KEY;
@@ -21,6 +27,20 @@ import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.SMS_MSG_EX
 public class SMSReceivedAlarmService extends LifecycleService {
     private AlarmPlayer alarmPlayer;
     private boolean firstTime = true;
+
+    private LiveData<String> alarmSound;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+
+        alarmSound = new SharedPreferenceLiveData<>(String.class,
+                sharedPreferences, ALARM_SOUND_KEY);
+        alarmSound.observeForever(s -> { });
+    }
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
@@ -65,7 +85,7 @@ public class SMSReceivedAlarmService extends LifecycleService {
         }
 
         if (alarmPlayer != null) alarmPlayer.stop();
-        alarmPlayer = new AlarmPlayer(this);
+        alarmPlayer = new AlarmPlayer(this, Uri.parse(alarmSound.getValue()));
         alarmPlayer.play();
 
         return super.onStartCommand(intent, flags, startId);
