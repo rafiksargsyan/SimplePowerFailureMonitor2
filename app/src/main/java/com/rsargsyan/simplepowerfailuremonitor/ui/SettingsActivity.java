@@ -1,13 +1,20 @@
 package com.rsargsyan.simplepowerfailuremonitor.ui;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.method.PasswordTransformationMethod;
+import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -48,6 +55,7 @@ public class SettingsActivity extends AppCompatActivity {
     private static final char DOT = '\u2022';
     private static final int SEND_SMS_PERMISSION_REQUEST_CODE = 7;
     private static final int ALARM_SMS_PERMISSION_REQUEST_CODE = 13;
+    private static final int RINGTONE_PICKER_REQUEST_CODE = 17;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +77,7 @@ public class SettingsActivity extends AppCompatActivity {
         private SwitchPreferenceCompat sendSmsPref;
         private SwitchPreferenceCompat smsAlarmPref;
         private SharedPreferences sharedPreferences;
+        private EditTextPreference alarmSoundPref;
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,6 +89,7 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+
             addAlarmSoundPreference();
 
             setEditTextPreferenceInputType(findPreference(PHONE_NUMBER_KEY), TYPE_CLASS_PHONE);
@@ -127,42 +137,20 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         private void addAlarmSoundPreference() {
-            ListPreference alarmSoundPref = new ListPreference(this.requireContext());
+            alarmSoundPref = new RingtonePickerPreference(this.requireContext());
             alarmSoundPref.setKey(Constants.ALARM_SOUND_KEY);
             alarmSoundPref.setTitle(R.string.alarm_sound_title);
-            alarmSoundPref.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
-
-            Map<String, String> notifications = getNotifications();
-            final String[] alarmNames = notifications.keySet().toArray(new String[0]);
-            // Arrays.sort(alarmNames);
-
-            alarmSoundPref.setEntries(alarmNames);
-            alarmSoundPref.setEntryValues(notifications.values().toArray(new String[0]));
+            alarmSoundPref.setDefaultValue(Settings.System.DEFAULT_ALARM_ALERT_URI);
 
             PreferenceCategory alarmSettingsPrefCategory =
                     findPreference(Constants.ALARM_SETTINGS_KEY);
-            alarmSettingsPrefCategory.addPreference(alarmSoundPref);
+            Objects.requireNonNull(alarmSettingsPrefCategory).addPreference(alarmSoundPref);
 
+            alarmSoundPref.setSummary(RingtoneManager.getRingtone(getContext(),
+                    Uri.parse(alarmSoundPref.getText())).getTitle(getContext()));
             // It is important to set dependency after adding the preference to preference
             // category, otherwise an exception is thrown
             alarmSoundPref.setDependency(Constants.PLAY_ALARM_SOUND_KEY);
-        }
-
-        public Map<String, String> getNotifications() {
-            RingtoneManager manager = new RingtoneManager(this.requireContext());
-            manager.setType(RingtoneManager.TYPE_ALARM);
-            Cursor cursor = manager.getCursor();
-
-            Map<String, String> list = new HashMap<>();
-            while (cursor.moveToNext()) {
-                String notificationTitle = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
-                String notificationUri = cursor.getString(RingtoneManager.URI_COLUMN_INDEX) + "/"
-                        + cursor.getString(RingtoneManager.ID_COLUMN_INDEX);
-
-                list.put(notificationTitle, notificationUri);
-            }
-
-            return list;
         }
 
         @Override
@@ -179,6 +167,21 @@ public class SettingsActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     smsAlarmPref.setChecked(true);
+                }
+            }
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+            if (resultCode == Activity.RESULT_OK && requestCode == RINGTONE_PICKER_REQUEST_CODE
+                    && data != null) {
+                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+
+                if (uri != null) {
+                    alarmSoundPref.setText(uri.toString());
+                    Ringtone ringtone = RingtoneManager.getRingtone(getContext(), uri);
+                    String title = ringtone.getTitle(getContext());
+                    alarmSoundPref.setSummary(title);
                 }
             }
         }
@@ -215,6 +218,39 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                     return StringUtils.repeat(DOT, length);
                 });
+            }
+        }
+
+        private class RingtonePickerPreference extends EditTextPreference {
+            public RingtonePickerPreference(Context context, AttributeSet attrs,
+                                            int defStyleAttr, int defStyleRes) {
+                super(context, attrs, defStyleAttr, defStyleRes);
+            }
+
+            public RingtonePickerPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+                super(context, attrs, defStyleAttr);
+            }
+
+            public RingtonePickerPreference(Context context, AttributeSet attrs) {
+                super(context, attrs);
+            }
+
+            public RingtonePickerPreference(Context context) {
+                super(context);
+            }
+
+            @Override
+            protected void onClick() {
+                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm sound");
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI,
+                        Settings.System.DEFAULT_ALARM_ALERT_URI);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
+                        Uri.parse(alarmSoundPref.getText()));
+                startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
             }
         }
     }
