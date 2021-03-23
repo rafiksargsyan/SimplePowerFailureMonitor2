@@ -40,4 +40,6 @@
     <string name="click_to_manage">Нажмите, чтобы управлять</string>
     <string name="use_default_email_sender">Использовать отправителя электронной почты по умолчанию</string>
     <string name="alarming_sms_received_notif">Получено SMS тревоги</string>
+    <string name="alarm_sound_title">Сигнал тревоги</string>
+    <string name="select_alarm_sound">Выберите звуковой сигнал</string>
 </resources>

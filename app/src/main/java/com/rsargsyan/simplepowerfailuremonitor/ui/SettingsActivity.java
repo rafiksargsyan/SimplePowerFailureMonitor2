@@ -226,7 +226,8 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             protected void onClick() {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select alarm sound");
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE,
+                        getString(R.string.select_alarm_sound));
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);

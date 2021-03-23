@@ -40,4 +40,6 @@
     <string name="click_to_manage">Սեղմեք՝ ղեկավարելու համար</string>
     <string name="use_default_email_sender">Օգտագործել էլփոստի լռելյայն ուղարկողին</string>
     <string name="alarming_sms_received_notif">Ստացվել է տագնապի SMS</string>
+    <string name="alarm_sound_title">Տագնապի ձայն</string>
+    <string name="select_alarm_sound">Ընտրեք տագնապի ձայնը</string>
 </resources>
