@@ -42,4 +42,9 @@
     <string name="alarming_sms_received_notif">Ստացվել է տագնապի SMS</string>
     <string name="alarm_sound_title">Տագնապի ձայն</string>
     <string name="select_alarm_sound">Ընտրեք տագնապի ձայնը</string>
+    <string name="help">Օգնություն</string>
+    <string name="gmail_help_paragraph">https://support.google.com/a/answer/176600\
+https://support.google.com/accounts/answer/6010255\
+https://support.google.com/a/answer/6260879\
+Խնդրում ենք նկատի ունենալ, եթե gmail հաշիվը որպես ուղարկողի հասցե է օգտագործվում, ապա պետք է ակտիվացնեք \"Less secure app access\" կարգավորումը.</string>
 </resources>

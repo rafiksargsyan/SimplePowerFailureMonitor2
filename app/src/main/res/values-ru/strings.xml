@@ -42,4 +42,9 @@
     <string name="alarming_sms_received_notif">Получено SMS тревоги</string>
     <string name="alarm_sound_title">Сигнал тревоги</string>
     <string name="select_alarm_sound">Выберите звуковой сигнал</string>
+    <string name="help">Помощь</string>
+    <string name="gmail_help_paragraph">https://support.google.com/a/answer/176600\
+https://support.google.com/accounts/answer/6010255\
+https://support.google.com/a/answer/6260879\
+Обратите внимание: если вы используете учетную запись gmail в качестве адреса отправителя, вы должны включить опцию \"Less secure app access\".</string>
 </resources>

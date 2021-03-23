@@ -5,4 +5,8 @@
         android:icon="@drawable/ic_sharp_settings_24"
         android:title="@string/settings"
         app:showAsAction="ifRoom" />
+    <item android:id="@+id/help_item"
+        android:icon="@drawable/ic_sharp_help_24"
+        android:title="@string/help"
+        app:showAsAction="ifRoom" />
 </menu>

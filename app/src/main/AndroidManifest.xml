@@ -17,11 +17,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SimplePowerFailureMonitor.Bee">
+        <activity android:name=".ui.HelpActivity"
+            android:label="@string/help"
+            android:parentActivityName=".ui.MainActivity"/>
         <activity
             android:name=".ui.SmsAlarmCancelActivity"
-            android:theme="@style/Theme.SimplePowerFailureMonitor.Bee.NoActionBar.FullScreen"
+            android:excludeFromRecents="true"
             android:launchMode="singleTop"
-            android:excludeFromRecents="true" />
+            android:theme="@style/Theme.SimplePowerFailureMonitor.Bee.NoActionBar.FullScreen" />
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/title_activity_settings"

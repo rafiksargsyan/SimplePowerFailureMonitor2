@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Power Failure Monitor</string>
     <string name="start_stop_monitoring">Start / stop monitoring</string>
     <string name="settings">Settings</string>
@@ -42,4 +42,15 @@
     <string name="alarming_sms_received_notif">Alarming SMS received</string>
     <string name="alarm_sound_title">Alarm sound</string>
     <string name="select_alarm_sound">Select alarm sound</string>
+    <string name="help">Help</string>
+    <string name="help_email_title" tools:ignore="MissingTranslation">Email</string>
+    <string name="gmail_subsection_title" translatable="false">Gmail</string>
+    <string name="gmail_help_paragraph">https://support.google.com/a/answer/176600\
+https://support.google.com/accounts/answer/6010255\
+https://support.google.com/a/answer/6260879\
+Please note, if you use gmail account as a sender address you must enable \"Less secure app access\" option.</string>
+    <string name="yahoo_subsection_title" translatable="false">Yahoo</string>
+    <string name="yahoo_help_paragraph" translatable="false">https://help.yahoo.com/kb/sln4075.html</string>
+    <string name="outlook_subsection_title" translatable="false">Outlook</string>
+    <string name="outlook_help_paragraph" translatable="false">https://support.office.com/en-us/article/pop-imap-and-smtp-settings-for-outlook-com-d088b986-291d-42b8-9564-9c414e2aa040</string>
 </resources>

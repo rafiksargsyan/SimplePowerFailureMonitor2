@@ -126,14 +126,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.settings_item) {
-            openSettingsActivity();
+            startActivity(SettingsActivity.class);
+            return true;
+        } else if (item.getItemId() == R.id.help_item) {
+            startActivity(HelpActivity.class);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void openSettingsActivity() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+    private void startActivity(Class<?> activityClass) {
+        Intent intent = new Intent(this, activityClass);
         startActivity(intent);
     }
 
