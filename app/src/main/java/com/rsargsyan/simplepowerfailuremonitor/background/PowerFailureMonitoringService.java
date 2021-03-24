@@ -324,6 +324,11 @@ public class PowerFailureMonitoringService extends LifecycleService {
         final String fromFinal = from;
         final String portFinal = port;
 
+        if (smtpServerFinal == null || smtpUsernameFinal == null ||
+                smtpPasswordFinal == null || portFinal == null || to == null) {
+            return;
+        }
+
         new MaildroidX.Builder()
                 .smtp(smtpServerFinal)
                 .smtpUsername(smtpUsernameFinal)

@@ -87,6 +87,7 @@
             app:title="@string/use_default_email_sender"
             app:summaryOn="@string/email_use_default_summary_on"
             app:summaryOff="@string/email_use_default_summary_off"
+            app:defaultValue="true"
             app:disableDependentsState="true"
             app:dependency="send_email"/>
 

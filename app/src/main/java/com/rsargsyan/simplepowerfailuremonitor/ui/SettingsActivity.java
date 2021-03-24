@@ -140,7 +140,7 @@ public class SettingsActivity extends AppCompatActivity {
             alarmSoundPref = new RingtonePickerPreference(this.requireContext());
             alarmSoundPref.setKey(Constants.ALARM_SOUND_KEY);
             alarmSoundPref.setTitle(R.string.alarm_sound_title);
-            alarmSoundPref.setDefaultValue(Settings.System.DEFAULT_ALARM_ALERT_URI);
+            alarmSoundPref.setDefaultValue(Settings.System.DEFAULT_ALARM_ALERT_URI.toString());
 
             PreferenceCategory alarmSettingsPrefCategory =
                     findPreference(Constants.ALARM_SETTINGS_KEY);
