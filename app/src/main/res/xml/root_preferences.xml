@@ -96,7 +96,7 @@
             app:title="@string/smtp_server_title"
             app:useSimpleSummaryProvider="true"
             app:dependency="email_use_default"
-            app:defaultValue="smtp.google.com" />
+            app:defaultValue="smtp.gmail.com" />
 
         <EditTextPreference
             app:key="smtp_port"

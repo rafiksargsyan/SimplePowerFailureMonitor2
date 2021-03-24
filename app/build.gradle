@@ -20,11 +20,20 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
         }
     }
+
+    flavorDimensions "permission"
+    productFlavors {
+        sms {
+            applicationId "com.rsargsyan.simplepowerfailuremonitor.sms"
+            dimension "permission"
+        }
+    }
+
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
