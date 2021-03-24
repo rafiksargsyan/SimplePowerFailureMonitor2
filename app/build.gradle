@@ -29,7 +29,16 @@ android {
     flavorDimensions "permission"
     productFlavors {
         sms {
+            versionCode 3
+            versionName "1.0"
             applicationId "com.rsargsyan.simplepowerfailuremonitor.sms"
+            dimension "permission"
+        }
+
+        gplay {
+            versionCode 5
+            versionName "1.0"
+            applicationId "com.rsargsyan.simplepowerfailuremonitor"
             dimension "permission"
         }
     }

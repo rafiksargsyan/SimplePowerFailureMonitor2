@@ -1,0 +1,140 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="alarm_settings"
+        app:title="@string/alarm_settings_title"
+        app:icon="@drawable/ic_sharp_alarm_24">
+
+        <SwitchPreferenceCompat
+            app:key="play_alarm_sound"
+            app:title="@string/play_alarm_sound_title"
+            app:summary="@string/play_alarm_sound_summary"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="smart_cancel"
+            app:title="@string/alarm_sound_smart_muting_title"
+            app:summary="@string/alarm_smart_muting_summary"
+            app:dependency="play_alarm_sound"
+            app:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sms_settings"
+        app:icon="@drawable/ic_sharp_textsms_24"
+        app:isPreferenceVisible="false">
+
+        <SwitchPreferenceCompat
+            app:key="send_sms"
+            app:title="@string/send_sms_title"
+            app:summaryOff="@string/disabled"
+            app:summaryOn="@string/enabled"
+            app:defaultValue="false" />
+
+        <EditTextPreference
+            app:key="phone_number"
+            app:title="@string/recipient_phone_number"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_sms" />
+
+        <EditTextPreference
+            app:key="power_off_msg"
+            app:title="@string/power_off_msg_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_sms"
+            app:defaultValue="@string/power_is_off" />
+
+        <EditTextPreference
+            app:key="power_on_msg"
+            app:title="@string/power_on_msg_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_sms"
+            app:defaultValue="@string/power_is_on" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/email_settings"
+        app:icon="@drawable/ic_sharp_email_24">
+
+        <SwitchPreferenceCompat
+            app:key="send_email"
+            app:title="@string/send_email_title"
+            app:summaryOn="@string/enabled"
+            app:summaryOff="@string/disabled"
+            app:defaultValue="false" />
+
+        <EditTextPreference
+            app:key="recipient_email_address"
+            app:title="@string/recipient_email_address_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_email" />
+
+        <EditTextPreference
+            app:key="power_off_body"
+            app:title="@string/power_off_email_body_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_email"
+            app:defaultValue="@string/power_is_off" />
+
+        <EditTextPreference
+            app:key="power_on_body"
+            app:title="@string/power_on_email_body"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="send_email"
+            app:defaultValue="@string/power_is_on" />
+
+        <SwitchPreferenceCompat
+            app:key="email_use_default"
+            app:title="@string/use_default_email_sender"
+            app:summaryOn="@string/email_use_default_summary_on"
+            app:summaryOff="@string/email_use_default_summary_off"
+            app:defaultValue="true"
+            app:disableDependentsState="true"
+            app:dependency="send_email"/>
+
+        <EditTextPreference
+            app:key="smtp_server"
+            app:title="@string/smtp_server_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default"
+            app:defaultValue="smtp.gmail.com" />
+
+        <EditTextPreference
+            app:key="smtp_port"
+            app:title="SMTP port"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default"
+            app:defaultValue="465" />
+
+        <EditTextPreference
+            app:key="email_address"
+            app:title="@string/sender_email_address_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default" />
+
+        <EditTextPreference
+            app:key="email_password"
+            app:title="@string/sender_email_password_title"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="email_use_default" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sms_alarm_settings"
+        app:icon="@drawable/ic_sharp_sms_failed_24"
+        app:isPreferenceVisible="false">
+        <SwitchPreferenceCompat
+            app:key="sms_alarm"
+            app:title="@string/sms_alarm_title"
+            app:defaultValue="false"
+            app:summaryOn="@string/enabled"
+            app:summaryOff="@string/disabled" />
+
+        <EditTextPreference
+            app:key="alarming_message"
+            app:title="@string/alarming_message_title"
+            app:defaultValue="@string/power_is_off"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="sms_alarm" />
+    </PreferenceCategory>
+</PreferenceScreen>
