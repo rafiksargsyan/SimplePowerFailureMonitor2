@@ -8,6 +8,10 @@ Main features:
 
 Please note, if you use gmail account as a sender address you must enable
 "Less secure app access" option.
+<a href="https://play.google.com/store/apps/details?id=com.rsargsyan.simplepowerfailuremonitor">
+  <img alt="Get HeadsUp on Google Play" vspace="20"
+       src="http://developer.android.com/images/brand/en_generic_rgb_wo_60.png" />
+</a>
 
 Google Play version doesn't have SMS sending/alarming features because of security restrictions imposed by Google.
 
