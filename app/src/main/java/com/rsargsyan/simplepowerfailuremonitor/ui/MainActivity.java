@@ -3,6 +3,7 @@ package com.rsargsyan.simplepowerfailuremonitor.ui;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.rsargsyan.simplepowerfailuremonitor.viewmodel.MainAndroidViewModelFactory;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         mainViewModel =
                 new ViewModelProvider(this, new MainAndroidViewModelFactory(getApplication()))
                         .get(MainViewModel.class);
+
 
         mainViewModel.getMonitoringIsStarted().observe(this, o -> {
             if (o == null) o = Constants.MONITORING_STARTED_DEFAULT;
@@ -131,6 +134,15 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.help_item) {
             startActivity(HelpActivity.class);
             return true;
+        }
+        else if(item.getItemId() == R.id.switch_theme){
+           if( AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
+               AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+           }
+           else {
+               AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+           }
+            return  true;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -9,4 +9,10 @@
         android:icon="@drawable/ic_sharp_help_24"
         android:title="@string/help"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/switch_theme"
+        android:icon="@drawable/invert_color"
+        app:showAsAction="ifRoom"
+        android:title="@string/invert_color">
+    </item>
 </menu>

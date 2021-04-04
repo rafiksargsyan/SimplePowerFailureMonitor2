@@ -3,6 +3,7 @@
     <string name="start_stop_monitoring">Start / stop monitoring</string>
     <string name="settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="invert_color" translatable="false">Invert Color</string>
 
     <string name="alarm_settings_title">Alarm settings</string>
     <string name="play_alarm_sound_title">Play alarm sound</string>
