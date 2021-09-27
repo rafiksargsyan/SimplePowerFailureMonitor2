@@ -27,23 +27,27 @@ import androidx.preference.PreferenceManager;
 import com.rsargsyan.simplepowerfailuremonitor.utils.AlarmPlayer;
 import com.rsargsyan.simplepowerfailuremonitor.utils.HumanInteractionDetector;
 import com.rsargsyan.simplepowerfailuremonitor.R;
+import com.rsargsyan.simplepowerfailuremonitor.utils.RetrofitClientInstance;
+import com.rsargsyan.simplepowerfailuremonitor.utils.SendEmailService;
+import com.rsargsyan.simplepowerfailuremonitor.utils.SendEmailStatus;
 import com.rsargsyan.simplepowerfailuremonitor.viewmodel.SharedPreferenceLiveData;
 import com.rsargsyan.simplepowerfailuremonitor.ui.MainActivity;
 import com.rsargsyan.simplepowerfailuremonitor.utils.DrawableUtil;
 import com.rsargsyan.simplepowerfailuremonitor.utils.SMSUtil;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import co.nedim.maildroidx.MaildroidX;
 import co.nedim.maildroidx.MaildroidXType;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.ALARM_SOUND_SMART_MUTE_KEY;
-import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PASSWORD;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_PORT;
-import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_SERVER;
-import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.DEFAULT_SMTP_USERNAME;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.EMAIL_USE_DEFAULT_KEY;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MAIN_NOTIFICATION_CHANNEL_ID;
 import static com.rsargsyan.simplepowerfailuremonitor.utils.Constants.MONITORING_NOTIFICATION_ID;
@@ -303,12 +307,12 @@ public class PowerFailureMonitoringService extends LifecycleService {
     }
 
     private void sendEmail(String body) {
-        String smtpServer = DEFAULT_SMTP_SERVER;
-        String smtpUsername = DEFAULT_SMTP_USERNAME;
-        String smtpPassword = DEFAULT_SMTP_PASSWORD;
+        String smtpServer = null;
+        String smtpUsername = null;
+        String smtpPassword = null;
         String port = DEFAULT_SMTP_PORT;
         final String to = recipientEmailAddress.getValue();
-        String from = smtpUsername;
+        String from = null;
 
         if (!shouldUseDefaultEmail()) {
             smtpServer = this.smtpServer.getValue();
@@ -329,17 +333,30 @@ public class PowerFailureMonitoringService extends LifecycleService {
             return;
         }
 
-        new MaildroidX.Builder()
-                .smtp(smtpServerFinal)
-                .smtpUsername(smtpUsernameFinal)
-                .smtpPassword(smtpPasswordFinal)
-                .port(portFinal)
-                .type(MaildroidXType.PLAIN)
-                .to(to)
-                .from(fromFinal)
-                .subject(getString(R.string.app_name))
-                .body(body)
-                .mail();
+        if (shouldUseDefaultEmail()) {
+            SendEmailService service =
+                    RetrofitClientInstance.getRetrofitInstance().create(SendEmailService.class);
+            Call<SendEmailStatus> call = service.sendEmail(portFinal, to, getString(R.string.app_name), body);
+            call.enqueue(new Callback<SendEmailStatus>() {
+                @Override
+                public void onResponse(Call<SendEmailStatus> call,
+                                       Response<SendEmailStatus> response) { }
+                                       @Override
+                public void onFailure(Call<SendEmailStatus> call, Throwable t) { }
+            });
+        } else {
+            new MaildroidX.Builder()
+                    .smtp(smtpServerFinal)
+                    .smtpUsername(smtpUsernameFinal)
+                    .smtpPassword(smtpPasswordFinal)
+                    .port(portFinal)
+                    .type(MaildroidXType.PLAIN)
+                    .to(to)
+                    .from(fromFinal)
+                    .subject(getString(R.string.app_name))
+                    .body(body)
+                    .mail();
+        }
     }
 
     private boolean shouldUseDefaultEmail() {

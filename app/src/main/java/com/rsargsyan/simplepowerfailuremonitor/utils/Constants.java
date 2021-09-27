@@ -33,9 +33,6 @@ public class Constants {
     public static final String SENDER_EMAIL_PASSWORD_KEY = "email_password";
 
     // Default SMTP settings
-    public static final String DEFAULT_SMTP_SERVER = "smtp.gmail.com";
-    public static final String DEFAULT_SMTP_USERNAME = "simplepowerfailuremonitor@gmail.com";
-    public static final String DEFAULT_SMTP_PASSWORD = "~/&LX)@5w9KS^2#>";
     public static final String DEFAULT_SMTP_PORT = "465";
 
     // SMS alarm settings
